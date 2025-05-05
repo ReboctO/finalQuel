@@ -1,0 +1,176 @@
+@model TheQuel.Models.AdminRegisterViewModel
+@{
+    ViewData["Title"] = "Register New Admin";
+    Layout = "_AdminLayout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-header py-3 bg-primary">
+                <h6 class="m-0 font-weight-bold text-white">Create New Administrator Account</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="p-5">
+                    <div class="alert alert-admin mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                <strong>Important:</strong> Creating a new admin gives full system access. Only create accounts for trusted individuals. All admin actions are logged and tracked.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form asp-controller="AdminAccount" asp-action="Register" method="post" class="user needs-validation">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <h5 class="text-primary mb-3">Personal Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label asp-for="FirstName" class="form-label">First Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input asp-for="FirstName" class="form-control form-control-user" placeholder="First Name" />
+                                    </div>
+                                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label asp-for="LastName" class="form-label">Last Name</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                        <input asp-for="LastName" class="form-control form-control-user" placeholder="Last Name" />
+                                    </div>
+                                    <span asp-validation-for="LastName" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control form-control-user" placeholder="Email Address" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                                <input asp-for="PhoneNumber" class="form-control form-control-user" placeholder="Phone Number" />
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Address" class="form-label">Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                                <input asp-for="Address" class="form-control form-control-user" placeholder="Address" />
+                            </div>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+                        
+                        <h5 class="text-primary mb-3 mt-4">Security Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label asp-for="Password" class="form-label">Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                        <input asp-for="Password" class="form-control form-control-user" placeholder="Password" />
+                                    </div>
+                                    <span asp-validation-for="Password" class="text-danger"></span>
+                                    <div class="password-strength mt-2">
+                                        <div class="small text-muted">
+                                            Password must include at least:
+                                            <ul class="mb-0 ps-3 mt-1">
+                                                <li>8 characters in length</li>
+                                                <li>1 uppercase letter</li>
+                                                <li>1 lowercase letter</li>
+                                                <li>1 digit</li>
+                                                <li>1 special character</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                                        <input asp-for="ConfirmPassword" class="form-control form-control-user" placeholder="Confirm Password" />
+                                    </div>
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label asp-for="RegistrationCode" class="form-label">Admin Registration Code</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                                <input asp-for="RegistrationCode" class="form-control form-control-user" placeholder="ADMIN-XXXXXX" />
+                            </div>
+                            <span asp-validation-for="RegistrationCode" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                This code is provided by the system administrator to authorize new admin registrations.
+                                For testing, use: <span class="text-primary fw-bold">ADMIN-123456</span>
+                            </small>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="termsCheck" required>
+                                <label class="form-check-label" for="termsCheck">
+                                    I confirm that this account is for an authorized administrator and that all information provided is accurate
+                                </label>
+                                <div class="invalid-feedback">
+                                    You must confirm before proceeding
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                            <i class="bi bi-person-plus me-2"></i>Register Account
+                        </button>
+                    </form>
+                    <hr>
+                    <div class="text-center">
+                        <a class="small" asp-controller="Admin" asp-action="Dashboard">Back to Admin Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        // Example of client-side password validation enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('Password');
+            const form = document.querySelector('.needs-validation');
+            
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    
+                    form.classList.add('was-validated');
+                }, false);
+            }
+        });
+    </script>
+} 

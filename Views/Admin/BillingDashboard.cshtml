@@ -1,0 +1,386 @@
+@{
+    ViewData["Title"] = "Billing Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800">Billing Dashboard</h1>
+            <p class="mb-0">Manage payments, bills and generate reports.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="GenerateBills" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Generate Bills
+            </a>
+            <a asp-action="PaymentReports" class="btn btn-secondary">
+                <i class="bi bi-file-earmark-text"></i> Reports
+            </a>
+        </div>
+    </div>
+
+    <!-- Dashboard Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Payments (Year)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-credit-card fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Payments (Month)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">$21,500</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cash-coin fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Payments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Overdue Payments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">5</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clock-history fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Payments -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">Recent Payments</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="recentPaymentsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Reference</th>
+                            <th>Homeowner</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>PAY12345</td>
+                            <td>John Doe</td>
+                            <td>$2,500.00</td>
+                            <td>Maintenance Fee</td>
+                            <td>May 15, 2023</td>
+                            <td><span class="badge bg-success">Paid</span></td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="#" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                    <a href="#" class="btn btn-secondary btn-sm"><i class="bi bi-printer"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PAY12346</td>
+                            <td>Jane Smith</td>
+                            <td>$1,500.00</td>
+                            <td>Security Fee</td>
+                            <td>May 14, 2023</td>
+                            <td><span class="badge bg-success">Paid</span></td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="#" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                    <a href="#" class="btn btn-secondary btn-sm"><i class="bi bi-printer"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PAY12347</td>
+                            <td>Robert Johnson</td>
+                            <td>$2,500.00</td>
+                            <td>Maintenance Fee</td>
+                            <td>May 15, 2023</td>
+                            <td><span class="badge bg-warning">Pending</span></td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="#" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                    <a href="#" class="btn btn-success btn-sm"><i class="bi bi-check-lg"></i></a>
+                                    <a href="#" class="btn btn-danger btn-sm"><i class="bi bi-x-lg"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Pending Bills -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">Pending Bills</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="pendingBillsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Homeowner</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Due Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Michael Wilson</td>
+                                    <td>$2,500.00</td>
+                                    <td>Maintenance Fee</td>
+                                    <td>Jun 01, 2023</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                            <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-send"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Sarah Taylor</td>
+                                    <td>$1,500.00</td>
+                                    <td>Security Fee</td>
+                                    <td>Jun 01, 2023</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                            <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-send"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">Payment Methods</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="paymentMethodsChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> Credit Card
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Bank Transfer
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-info"></i> Cash
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-warning"></i> Other
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Revenue -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">Monthly Revenue</h6>
+        </div>
+        <div class="card-body">
+            <div class="chart-area">
+                <canvas id="monthlyRevenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#recentPaymentsTable').DataTable();
+            $('#pendingBillsTable').DataTable();
+            
+            // Payment Methods Chart
+            var ctx = document.getElementById("paymentMethodsChart");
+            var paymentMethodsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ["Credit Card", "Bank Transfer", "Cash", "Other"],
+                    datasets: [{
+                        data: [55, 30, 10, 5],
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e'],
+                        hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a'],
+                        hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    tooltips: {
+                        backgroundColor: "rgb(255,255,255)",
+                        bodyFontColor: "#858796",
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        xPadding: 15,
+                        yPadding: 15,
+                        displayColors: false,
+                        caretPadding: 10,
+                    },
+                    legend: {
+                        display: false
+                    },
+                    cutoutPercentage: 80,
+                },
+            });
+            
+            // Monthly Revenue Chart
+            var ctx2 = document.getElementById("monthlyRevenueChart");
+            var monthlyRevenueChart = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    datasets: [{
+                        label: "Revenue",
+                        lineTension: 0.3,
+                        backgroundColor: "rgba(78, 115, 223, 0.05)",
+                        borderColor: "rgba(78, 115, 223, 1)",
+                        pointRadius: 3,
+                        pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                        pointBorderColor: "rgba(78, 115, 223, 1)",
+                        pointHoverRadius: 3,
+                        pointHoverBackgroundColor: "rgba(78, 115, 223, 1)",
+                        pointHoverBorderColor: "rgba(78, 115, 223, 1)",
+                        pointHitRadius: 10,
+                        pointBorderWidth: 2,
+                        data: [20000, 22000, 21500, 25000, 23000, 25000, 24000, 25500, 26000, 27000, 28000, 30000],
+                    }],
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 25,
+                            top: 25,
+                            bottom: 0
+                        }
+                    },
+                    scales: {
+                        xAxes: [{
+                            time: {
+                                unit: 'month'
+                            },
+                            gridLines: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            ticks: {
+                                maxTicksLimit: 12
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                maxTicksLimit: 5,
+                                padding: 10,
+                                callback: function(value, index, values) {
+                                    return '$' + value;
+                                }
+                            },
+                            gridLines: {
+                                color: "rgb(234, 236, 244)",
+                                zeroLineColor: "rgb(234, 236, 244)",
+                                drawBorder: false,
+                                borderDash: [2],
+                                zeroLineBorderDash: [2]
+                            }
+                        }],
+                    },
+                    legend: {
+                        display: false
+                    },
+                    tooltips: {
+                        backgroundColor: "rgb(255,255,255)",
+                        bodyFontColor: "#858796",
+                        titleMarginBottom: 10,
+                        titleFontColor: '#6e707e',
+                        titleFontSize: 14,
+                        borderColor: '#dddfeb',
+                        borderWidth: 1,
+                        xPadding: 15,
+                        yPadding: 15,
+                        displayColors: false,
+                        intersect: false,
+                        mode: 'index',
+                        caretPadding: 10,
+                        callbacks: {
+                            label: function(tooltipItem, chart) {
+                                var datasetLabel = chart.datasets[tooltipItem.datasetIndex].label || '';
+                                return datasetLabel + ': $' + tooltipItem.yLabel;
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+} 

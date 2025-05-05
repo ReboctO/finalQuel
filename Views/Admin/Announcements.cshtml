@@ -1,0 +1,199 @@
+@{
+    ViewData["Title"] = "Announcements";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800">Announcements</h1>
+            <p class="mb-0">Create and manage community announcements.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="CreateAnnouncement" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Announcement
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Announcements List -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">All Announcements</h6>
+        </div>
+        <div class="card-body">
+            <ul class="nav nav-tabs" id="announcementTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="true">Active</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="scheduled-tab" data-bs-toggle="tab" data-bs-target="#scheduled" type="button" role="tab" aria-controls="scheduled" aria-selected="false">Scheduled</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="archived-tab" data-bs-toggle="tab" data-bs-target="#archived" type="button" role="tab" aria-controls="archived" aria-selected="false">Archived</button>
+                </li>
+            </ul>
+            <div class="tab-content pt-4" id="announcementTabsContent">
+                <div class="tab-pane fade show active" id="active" role="tabpanel" aria-labelledby="active-tab">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="activeAnnouncementsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Urgency</th>
+                                    <th>Created</th>
+                                    <th>Notification</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Water Maintenance Schedule</td>
+                                    <td><span class="badge bg-warning">Medium</span></td>
+                                    <td>May 10, 2023</td>
+                                    <td>Email, On-site</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i></a>
+                                            <a href="#" class="btn btn-secondary btn-sm"><i class="bi bi-archive"></i></a>
+                                            <a href="#" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Community Meeting Reminder</td>
+                                    <td><span class="badge bg-info">Low</span></td>
+                                    <td>May 5, 2023</td>
+                                    <td>All Channels</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i></a>
+                                            <a href="#" class="btn btn-secondary btn-sm"><i class="bi bi-archive"></i></a>
+                                            <a href="#" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="scheduled" role="tabpanel" aria-labelledby="scheduled-tab">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="scheduledAnnouncementsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Urgency</th>
+                                    <th>Scheduled For</th>
+                                    <th>Notification</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Summer Pool Opening</td>
+                                    <td><span class="badge bg-info">Low</span></td>
+                                    <td>June 1, 2023</td>
+                                    <td>Email, On-site</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-pencil"></i></a>
+                                            <a href="#" class="btn btn-success btn-sm"><i class="bi bi-send"></i></a>
+                                            <a href="#" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="archived" role="tabpanel" aria-labelledby="archived-tab">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="archivedAnnouncementsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Urgency</th>
+                                    <th>Created</th>
+                                    <th>Archived</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Water Outage Notice</td>
+                                    <td><span class="badge bg-danger">Critical</span></td>
+                                    <td>April 15, 2023</td>
+                                    <td>April 18, 2023</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                            <a href="#" class="btn btn-success btn-sm"><i class="bi bi-arrow-counterclockwise"></i></a>
+                                            <a href="#" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Spring Cleaning Event</td>
+                                    <td><span class="badge bg-info">Low</span></td>
+                                    <td>March 10, 2023</td>
+                                    <td>March 25, 2023</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="#" class="btn btn-info btn-sm"><i class="bi bi-eye"></i></a>
+                                            <a href="#" class="btn btn-success btn-sm"><i class="bi bi-arrow-counterclockwise"></i></a>
+                                            <a href="#" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Analytics Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">Announcement Analytics</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <h4>78%</h4>
+                    <p>Read Rate</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h4>65%</h4>
+                    <p>Email Open Rate</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <h4>23%</h4>
+                    <p>Click-through Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#activeAnnouncementsTable').DataTable();
+            $('#scheduledAnnouncementsTable').DataTable();
+            $('#archivedAnnouncementsTable').DataTable();
+        });
+    </script>
+} 

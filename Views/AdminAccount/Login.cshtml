@@ -1,0 +1,77 @@
+@model TheQuel.Models.AdminLoginViewModel
+@{
+    ViewData["Title"] = "Admin Login";
+    Layout = "_AdminLayout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <div class="p-5">
+                    <div class="text-center">
+                        <h1 class="h4 text-gray-900 mb-4">Admin Login</h1>
+                        <p class="mb-4">Please enter your admin credentials to log in</p>
+                    </div>
+                    
+                    <form asp-controller="AdminAccount" asp-action="Login" method="post" class="user">
+                        <input type="hidden" name="ReturnUrl" value="@ViewData["ReturnUrl"]" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input asp-for="Email" class="form-control form-control-user" placeholder="Enter Email Address..." />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label asp-for="Password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-key"></i></span>
+                                <input asp-for="Password" class="form-control form-control-user" placeholder="Password" />
+                            </div>
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <div class="custom-control custom-checkbox small">
+                                <input asp-for="RememberMe" class="custom-control-input" id="customCheck" />
+                                <label class="custom-control-label" for="customCheck">Remember Me</label>
+                            </div>
+                        </div>
+                        
+                        <!-- reCAPTCHA would be implemented here in production -->
+                        <div class="form-group mb-3 text-center p-3 border rounded bg-light">
+                            <div class="recaptcha-placeholder">
+                                <i class="bi bi-shield-check text-primary" style="font-size: 2rem;"></i>
+                                <p class="small text-muted mb-0">reCAPTCHA protection would be here</p>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-user btn-block">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    <div class="text-center">
+                        <a class="small" asp-controller="Account" asp-action="ForgotPassword">Forgot Password?</a>
+                    </div>
+                    <div class="text-center mt-3">
+                        <p class="small text-danger mb-0"><i class="bi bi-exclamation-triangle"></i> Unauthorized access attempts are monitored and logged</p>
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">For admin users only. Regular users should use the <a asp-controller="Account" asp-action="Login">regular login page</a>.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

@@ -1,0 +1,162 @@
+@model TheQuel.Models.AnnouncementCreateViewModel
+@{
+    ViewData["Title"] = "Create Announcement";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0 text-gray-800">Create New Announcement</h1>
+            <p class="mb-0">Create a new announcement for the community.</p>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">Announcement Details</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateAnnouncement" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">Title</label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Content" class="form-label">Content</label>
+                    <textarea asp-for="Content" class="form-control" rows="5"></textarea>
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="UrgencyLevel" class="form-label">Urgency Level</label>
+                            <select asp-for="UrgencyLevel" class="form-control" asp-items="Html.GetEnumSelectList<TheQuel.Models.UrgencyLevel>()"></select>
+                            <span asp-validation-for="UrgencyLevel" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="NotificationMethod" class="form-label">Notification Method</label>
+                            <select asp-for="NotificationMethod" class="form-control" asp-items="Html.GetEnumSelectList<TheQuel.Models.NotificationMethod>()"></select>
+                            <span asp-validation-for="NotificationMethod" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" asp-for="SendEmail" />
+                            <label class="form-check-label" asp-for="SendEmail">Send Email Notification</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" asp-for="SendSMS" />
+                            <label class="form-check-label" asp-for="SendSMS">Send SMS Notification</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            Schedule (Optional)
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="scheduleOption" id="publishNow" value="now" checked>
+                                        <label class="form-check-label" for="publishNow">
+                                            Publish immediately
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="scheduleOption" id="scheduleLater" value="later">
+                                        <label class="form-check-label" for="scheduleLater">
+                                            Schedule for later
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="scheduleFields" class="mt-3" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduleDate" class="form-label">Date</label>
+                                            <input type="date" class="form-control" id="scheduleDate" name="ScheduleDate">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="scheduleTime" class="form-label">Time</label>
+                                            <input type="time" class="form-control" id="scheduleTime" name="ScheduleTime">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="card">
+                        <div class="card-header">
+                            Target Audience
+                        </div>
+                        <div class="card-body">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="audienceOption" id="allUsers" value="all" checked>
+                                <label class="form-check-label" for="allUsers">
+                                    All Users
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="audienceOption" id="homeowners" value="homeowners">
+                                <label class="form-check-label" for="homeowners">
+                                    Homeowners Only
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="audienceOption" id="staff" value="staff">
+                                <label class="form-check-label" for="staff">
+                                    Staff Only
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Announcements" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Create Announcement</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function() {
+            // Show/hide schedule fields based on radio button selection
+            $('input[name="scheduleOption"]').change(function() {
+                if ($(this).val() === 'later') {
+                    $('#scheduleFields').show();
+                } else {
+                    $('#scheduleFields').hide();
+                }
+            });
+        });
+    </script>
+} 

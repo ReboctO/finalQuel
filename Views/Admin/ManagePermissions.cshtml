@@ -1,0 +1,117 @@
+@model TheQuel.Models.UserPermissionsViewModel
+@{
+    ViewData["Title"] = "Manage Permissions";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0 text-gray-800">Manage Permissions</h1>
+            <p class="mb-0">Configure access rights for <strong>@Model.FullName</strong> (@Model.Role)</p>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-info">
+            <h6 class="m-0 font-weight-bold text-white">User Permissions</h6>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <p class="mb-0"><strong>Note:</strong> Admin users have all permissions by default.</p>
+            </div>
+            
+            <form asp-action="UpdatePermissions" method="post">
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                
+                <div class="accordion" id="permissionsAccordion">
+                    @{
+                        int categoryIndex = 0;
+                    }
+                    @foreach (var categoryGroup in Model.GroupedPermissions)
+                    {
+                        <div class="accordion-item mb-3">
+                            <h2 class="accordion-header" id="heading@(categoryIndex)">
+                                <button class="accordion-button @(categoryIndex > 0 ? "collapsed" : "")" type="button" data-bs-toggle="collapse" data-bs-target="#collapse@(categoryIndex)" aria-expanded="@(categoryIndex == 0 ? "true" : "false")" aria-controls="collapse@(categoryIndex)">
+                                    @categoryGroup.Key.ToString().SplitCamelCase()
+                                </button>
+                            </h2>
+                            <div id="collapse@(categoryIndex)" class="accordion-collapse collapse @(categoryIndex == 0 ? "show" : "")" aria-labelledby="heading@(categoryIndex)" data-bs-parent="#permissionsAccordion">
+                                <div class="accordion-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Permission</th>
+                                                    <th>Description</th>
+                                                    <th width="100">Granted</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var permission in categoryGroup.Value)
+                                                {
+                                                    <tr>
+                                                        <td>@permission.DisplayName</td>
+                                                        <td>@permission.Description</td>
+                                                        <td class="text-center">
+                                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                                <input class="form-check-input" type="checkbox" 
+                                                                       name="grantedPermissions" 
+                                                                       value="@permission.Permission" 
+                                                                       id="permission_@permission.Permission"
+                                                                       @(permission.IsGranted || Model.Role == TheQuel.Core.UserRole.Admin ? "checked" : "")
+                                                                       @(Model.Role == TheQuel.Core.UserRole.Admin ? "disabled" : "")>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        categoryIndex++;
+                    }
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="UserManagement" class="btn btn-secondary">Back to User List</a>
+                    @if (Model.Role != TheQuel.Core.UserRole.Admin)
+                    {
+                        <button type="submit" class="btn btn-primary">Save Permissions</button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Toggle all permissions in a category
+            $('.toggle-category').on('change', function() {
+                var isChecked = $(this).prop('checked');
+                var categoryId = $(this).data('category');
+                
+                $(`#collapse${categoryId} input[type="checkbox"]`).prop('checked', isChecked);
+            });
+        });
+    </script>
+} 

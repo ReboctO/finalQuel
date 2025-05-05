@@ -1,0 +1,64 @@
+@{
+    ViewData["Title"] = "Admin Portal";
+    Layout = "_AdminLayout";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card o-hidden border-0 shadow-lg my-5">
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div class="col-lg-6 d-none d-lg-block bg-admin-image">
+                            <div class="p-5 text-center d-flex align-items-center justify-content-center h-100">
+                                <div class="text-white">
+                                    <h1 class="h3 mb-4">TheQuel<br/>Admin Portal</h1>
+                                    <p class="mb-4">Secure access for property management administrators</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-5">
+                                <div class="text-center">
+                                    <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
+                                    <p class="mb-4">Please select an option below to proceed</p>
+                                </div>
+                                
+                                <div class="d-grid gap-3 mb-4">
+                                    <a asp-controller="AdminAccount" asp-action="Login" class="btn btn-primary btn-user btn-block">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                                    </a>
+                                    @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+                                    {
+                                        <a asp-controller="AdminAccount" asp-action="Register" class="btn btn-outline-primary btn-user btn-block">
+                                            <i class="bi bi-person-plus me-2"></i>Register New Admin
+                                        </a>
+                                    }
+                                </div>
+                                
+                                <hr>
+                                <div class="text-center">
+                                    <small class="text-muted">This area is restricted to authorized administrators only.</small>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a class="small" asp-controller="Home" asp-action="Index">Return to Homepage</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .bg-admin-image {
+            background: linear-gradient(rgba(78, 115, 223, 0.8), rgba(34, 74, 190, 0.8)), 
+                        url('/img/admin-bg.jpg');
+            background-position: center;
+            background-size: cover;
+        }
+    </style>
+} 

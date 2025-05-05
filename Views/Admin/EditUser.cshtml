@@ -1,0 +1,119 @@
+@model TheQuel.Models.UserEditViewModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-0 text-gray-800">Edit User</h1>
+            <p class="mb-0">Update user information and permissions.</p>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">User Information</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="EditUser" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="FirstName" class="form-label"></label>
+                            <input asp-for="FirstName" class="form-control" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="LastName" class="form-label"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+                
+                <div class="mb-3">
+                    <label asp-for="Address" class="form-label"></label>
+                    <input asp-for="Address" class="form-control" />
+                    <span asp-validation-for="Address" class="text-danger"></span>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label"></label>
+                            <select asp-for="Role" class="form-control" asp-items="Html.GetEnumSelectList<TheQuel.Core.UserRole>()"></select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <div class="form-check form-switch mt-4">
+                                <input class="form-check-input" type="checkbox" asp-for="IsActive">
+                                <label class="form-check-label" asp-for="IsActive"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="UserManagement" class="btn btn-secondary">Back to List</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card shadow mb-4 mt-4">
+        <div class="card-header py-3 bg-warning">
+            <h6 class="m-0 font-weight-bold text-dark">Security Settings</h6>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <h5>Reset Password</h5>
+                <p>Send a password reset link to this user's email address.</p>
+                <button type="button" class="btn btn-warning">Send Reset Link</button>
+            </div>
+            
+            <hr>
+            
+            <div class="mb-3">
+                <h5>Two-Factor Authentication</h5>
+                <p>Enable or disable two-factor authentication for this user.</p>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="twoFactorEnabled">
+                    <label class="form-check-label" for="twoFactorEnabled">Enable Two-Factor Authentication</label>
+                </div>
+            </div>
+            
+            <hr>
+            
+            <div>
+                <h5>Login History</h5>
+                <p>View the login history for this user.</p>
+                <button type="button" class="btn btn-outline-secondary">View Login History</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 
