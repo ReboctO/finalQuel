@@ -17,6 +17,8 @@ namespace TheQuel.Data
         public DbSet<Event> Events { get; set; }
         public DbSet<EventAttendee> EventAttendees { get; set; }
         public DbSet<UserPermission> UserPermissions { get; set; }
+        public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<AnnouncementRecipient> AnnouncementRecipients { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -81,6 +83,23 @@ namespace TheQuel.Data
             modelBuilder.Entity<UserPermission>()
                 .HasIndex(up => new { up.UserId, up.Permission })
                 .IsUnique();
+                
+            // Configure Announcement entity
+            modelBuilder.Entity<Announcement>()
+                .HasOne(a => a.CreatedBy)
+                .WithMany()
+                .HasForeignKey(a => a.CreatedById);
+                
+            // Configure AnnouncementRecipient entity
+            modelBuilder.Entity<AnnouncementRecipient>()
+                .HasOne(ar => ar.Announcement)
+                .WithMany(a => a.Recipients)
+                .HasForeignKey(ar => ar.AnnouncementId);
+                
+            modelBuilder.Entity<AnnouncementRecipient>()
+                .HasOne(ar => ar.User)
+                .WithMany()
+                .HasForeignKey(ar => ar.UserId);
         }
     }
 } 

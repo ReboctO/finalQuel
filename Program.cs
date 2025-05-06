@@ -30,11 +30,13 @@ namespace TheQuel
             // Register repositories
             builder.Services.AddScoped<TheQuel.Core.IUserRepository, TheQuel.Data.UserRepository>();
             builder.Services.AddScoped<TheQuel.Core.IPropertyRepository, TheQuel.Data.PropertyRepository>();
+            builder.Services.AddScoped<TheQuel.Core.IAnnouncementRepository, TheQuel.Data.AnnouncementRepository>();
 
             // Register services
             builder.Services.AddScoped<TheQuel.Services.IAuthService, TheQuel.Services.AuthService>();
             builder.Services.AddScoped<TheQuel.Services.IUserService, TheQuel.Services.UserService>();
             builder.Services.AddScoped<TheQuel.Services.IPropertyService, TheQuel.Services.PropertyService>();
+            builder.Services.AddScoped<TheQuel.Services.IAnnouncementService, TheQuel.Services.AnnouncementService>();
 
             // Add authentication and authorization
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -83,6 +85,9 @@ namespace TheQuel
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     context.Database.EnsureCreated();
+                    
+                    // Ensure Announcements tables exist
+                    await DatabaseMigrator.MigrateAnnouncementTablesAsync(app.Services);
                     
                     // Seed admin user
                     await AdminSeeder.SeedAdminUser(app.Services);

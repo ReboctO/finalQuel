@@ -122,6 +122,36 @@ namespace TheQuel.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Announcements",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UrgencyLevel = table.Column<int>(type: "int", nullable: false),
+                    PublishedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    NotificationMethod = table.Column<int>(type: "int", nullable: false),
+                    EmailSent = table.Column<bool>(type: "bit", nullable: false),
+                    SmsSent = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedById = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Announcements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Announcements_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Payments",
                 columns: table => new
                 {
@@ -182,6 +212,34 @@ namespace TheQuel.Data.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.CreateTable(
+                name: "AnnouncementRecipients",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AnnouncementId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    ReadAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AnnouncementRecipients", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AnnouncementRecipients_Announcements_AnnouncementId",
+                        column: x => x.AnnouncementId,
+                        principalTable: "Announcements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AnnouncementRecipients_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             // Create indexes
             migrationBuilder.CreateIndex(
                 name: "IX_Complaints_AssignedToId",
@@ -230,6 +288,21 @@ namespace TheQuel.Data.Migrations
                 table: "Users",
                 column: "Email",
                 unique: true);
+                
+            migrationBuilder.CreateIndex(
+                name: "IX_Announcements_CreatedById",
+                table: "Announcements",
+                column: "CreatedById");
+                
+            migrationBuilder.CreateIndex(
+                name: "IX_AnnouncementRecipients_AnnouncementId",
+                table: "AnnouncementRecipients",
+                column: "AnnouncementId");
+                
+            migrationBuilder.CreateIndex(
+                name: "IX_AnnouncementRecipients_UserId",
+                table: "AnnouncementRecipients",
+                column: "UserId");
 
             // Seed admin user
             migrationBuilder.InsertData(
@@ -248,9 +321,15 @@ namespace TheQuel.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Payments");
+                
+            migrationBuilder.DropTable(
+                name: "AnnouncementRecipients");
 
             migrationBuilder.DropTable(
                 name: "Events");
+                
+            migrationBuilder.DropTable(
+                name: "Announcements");
 
             migrationBuilder.DropTable(
                 name: "Properties");

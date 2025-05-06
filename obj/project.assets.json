@@ -4598,11 +4598,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\TheQuel\\TheQuel.csproj",
+      "projectUniqueName": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\TheQuel.csproj",
       "projectName": "TheQuel",
-      "projectPath": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\TheQuel\\TheQuel.csproj",
+      "projectPath": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\TheQuel.csproj",
       "packagesPath": "C:\\Users\\User\\.nuget\\packages",
-      "outputPath": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\TheQuel\\obj\\",
+      "outputPath": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"

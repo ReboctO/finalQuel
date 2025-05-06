@@ -16,11 +16,13 @@ namespace TheQuel.Controllers
     {
         private readonly IUserService _userService;
         private readonly IPropertyService _propertyService;
+        private readonly IAnnouncementService _announcementService;
         
-        public AdminController(IUserService userService, IPropertyService propertyService)
+        public AdminController(IUserService userService, IPropertyService propertyService, IAnnouncementService announcementService)
         {
             _userService = userService;
             _propertyService = propertyService;
+            _announcementService = announcementService;
         }
         
         public async Task<IActionResult> Dashboard()
@@ -325,11 +327,20 @@ namespace TheQuel.Controllers
         
         #region Announcements
         
-        public IActionResult Announcements()
+        [RequirePermission(Permission.ManageAnnouncements)]
+        public async Task<IActionResult> Announcements()
         {
-            return View();
+            var model = new AnnouncementsViewModel
+            {
+                ActiveAnnouncements = await _announcementService.GetActiveAnnouncementsAsync(),
+                ScheduledAnnouncements = await _announcementService.GetScheduledAnnouncementsAsync(),
+                ArchivedAnnouncements = await _announcementService.GetArchivedAnnouncementsAsync()
+            };
+            
+            return View(model);
         }
         
+        [RequirePermission(Permission.CreateAnnouncement)]
         public IActionResult CreateAnnouncement()
         {
             return View(new AnnouncementCreateViewModel 
@@ -341,16 +352,160 @@ namespace TheQuel.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateAnnouncement(AnnouncementCreateViewModel model)
+        [RequirePermission(Permission.CreateAnnouncement)]
+        public async Task<IActionResult> CreateAnnouncement(AnnouncementCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
             
-            // TODO: Implement announcement creation logic
+            try
+            {
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                await _announcementService.CreateAnnouncementAsync(model, userId);
+                
+                TempData["SuccessMessage"] = "Announcement created successfully.";
+                return RedirectToAction(nameof(Announcements));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+        
+        [RequirePermission(Permission.EditAnnouncement)]
+        public async Task<IActionResult> EditAnnouncement(int id)
+        {
+            var announcement = await _announcementService.GetAnnouncementByIdAsync(id);
             
-            TempData["SuccessMessage"] = "Announcement created successfully.";
+            if (announcement == null)
+            {
+                return NotFound();
+            }
+            
+            var model = new AnnouncementEditViewModel
+            {
+                Id = announcement.Id,
+                Title = announcement.Title,
+                Content = announcement.Content,
+                UrgencyLevel = (TheQuel.Models.UrgencyLevel)announcement.UrgencyLevel,
+                NotificationMethod = (TheQuel.Models.NotificationMethod)announcement.NotificationMethod,
+                IsActive = announcement.IsActive,
+                SendEmail = announcement.NotificationMethod == TheQuel.Core.NotificationMethod.Email || announcement.NotificationMethod == TheQuel.Core.NotificationMethod.All,
+                SendSMS = announcement.NotificationMethod == TheQuel.Core.NotificationMethod.SMS || announcement.NotificationMethod == TheQuel.Core.NotificationMethod.All
+            };
+            
+            return View(model);
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.EditAnnouncement)]
+        public async Task<IActionResult> EditAnnouncement(AnnouncementEditViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            
+            try
+            {
+                var announcement = await _announcementService.GetAnnouncementByIdAsync(model.Id);
+                
+                if (announcement == null)
+                {
+                    return NotFound();
+                }
+                
+                announcement.Title = model.Title;
+                announcement.Content = model.Content;
+                announcement.UrgencyLevel = (TheQuel.Core.UrgencyLevel)model.UrgencyLevel;
+                announcement.NotificationMethod = (TheQuel.Core.NotificationMethod)model.NotificationMethod;
+                announcement.IsActive = model.IsActive;
+                
+                await _announcementService.UpdateAnnouncementAsync(announcement);
+                
+                TempData["SuccessMessage"] = "Announcement updated successfully.";
+                return RedirectToAction(nameof(Announcements));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.DeleteAnnouncement)]
+        public async Task<IActionResult> DeleteAnnouncement(int id)
+        {
+            try
+            {
+                await _announcementService.DeleteAnnouncementAsync(id);
+                TempData["SuccessMessage"] = "Announcement deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            
+            return RedirectToAction(nameof(Announcements));
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ManageAnnouncements)]
+        public async Task<IActionResult> ArchiveAnnouncement(int id)
+        {
+            try
+            {
+                await _announcementService.ArchiveAnnouncementAsync(id);
+                TempData["SuccessMessage"] = "Announcement archived successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            
+            return RedirectToAction(nameof(Announcements));
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ManageAnnouncements)]
+        public async Task<IActionResult> PublishAnnouncement(int id)
+        {
+            try
+            {
+                await _announcementService.PublishAnnouncementAsync(id);
+                TempData["SuccessMessage"] = "Announcement published successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            
+            return RedirectToAction(nameof(Announcements));
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ManageAnnouncements)]
+        public async Task<IActionResult> RestoreAnnouncement(int id)
+        {
+            try
+            {
+                await _announcementService.RestoreAnnouncementAsync(id);
+                TempData["SuccessMessage"] = "Announcement restored successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            
             return RedirectToAction(nameof(Announcements));
         }
         

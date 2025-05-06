@@ -139,6 +139,41 @@ namespace TheQuel.Models
         public bool SendSMS { get; set; }
     }
     
+    public class AnnouncementEditViewModel
+    {
+        public int Id { get; set; }
+        
+        [Required]
+        public string Title { get; set; } = string.Empty;
+        
+        [Required]
+        public string Content { get; set; } = string.Empty;
+        
+        [Required]
+        [Display(Name = "Urgency Level")]
+        public UrgencyLevel UrgencyLevel { get; set; }
+        
+        [Required]
+        [Display(Name = "Notification Method")]
+        public NotificationMethod NotificationMethod { get; set; }
+        
+        [Display(Name = "Active")]
+        public bool IsActive { get; set; }
+        
+        [Display(Name = "Send Email")]
+        public bool SendEmail { get; set; }
+        
+        [Display(Name = "Send SMS")]
+        public bool SendSMS { get; set; }
+    }
+    
+    public class AnnouncementsViewModel
+    {
+        public IEnumerable<Announcement> ActiveAnnouncements { get; set; } = new List<Announcement>();
+        public IEnumerable<Announcement> ScheduledAnnouncements { get; set; } = new List<Announcement>();
+        public IEnumerable<Announcement> ArchivedAnnouncements { get; set; } = new List<Announcement>();
+    }
+    
     public enum UrgencyLevel
     {
         Low,
