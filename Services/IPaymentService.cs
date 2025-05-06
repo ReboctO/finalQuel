@@ -18,5 +18,12 @@ namespace TheQuel.Services
         Task<Payment> UpdatePaymentAsync(Payment payment);
         Task<bool> DeletePaymentAsync(int id);
         Task<Payment> RecordPaymentAsync(int paymentId, DateTime paymentDate, string referenceNumber);
+        
+        // New methods for bill generation and stats
+        Task<IEnumerable<Payment>> GenerateBillsAsync(PaymentType billType, decimal amount, DateTime dueDate, string notes, bool forAllHomeowners, int? specificUserId = null);
+        Task<decimal> GetTotalPaymentsForYearAsync(int year);
+        Task<decimal> GetTotalPaymentsForMonthAsync(int year, int month);
+        Task<int> GetPendingPaymentsCountAsync();
+        Task<int> GetOverduePaymentsCountAsync();
     }
 } 

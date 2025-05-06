@@ -59,6 +59,26 @@ namespace TheQuel.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserPermissions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Permission = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserPermissions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserPermissions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Complaints",
                 columns: table => new
                 {
@@ -303,12 +323,54 @@ namespace TheQuel.Data.Migrations
                 name: "IX_AnnouncementRecipients_UserId",
                 table: "AnnouncementRecipients",
                 column: "UserId");
+                
+            migrationBuilder.CreateIndex(
+                name: "IX_UserPermissions_UserId_Permission",
+                table: "UserPermissions",
+                columns: new[] { "UserId", "Permission" },
+                unique: true);
 
             // Seed admin user
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "FirstName", "LastName", "Email", "Password", "Role", "IsActive", "CreatedAt" },
                 values: new object[] { "Admin", "User", "admin@thequel.com", "AQAAAAEAACcQAAAAEHxlHKGU4mrMFXkNJ7tlwEZzYSUkFcckN0xLV9iVhLYR93FGbpV4Gvxp8PkGDlfyMQ==", 0, true, DateTime.Now });
+            
+            // Seed default admin permissions
+            migrationBuilder.Sql(@"
+                DECLARE @adminId INT;
+                SELECT @adminId = Id FROM Users WHERE Email = 'admin@thequel.com';
+                
+                INSERT INTO UserPermissions (UserId, Permission)
+                VALUES 
+                (@adminId, 0), -- ManageUsers
+                (@adminId, 1), -- CreateUser
+                (@adminId, 2), -- EditUser
+                (@adminId, 3), -- DeleteUser
+                (@adminId, 4), -- ManageAnnouncements
+                (@adminId, 5), -- CreateAnnouncement
+                (@adminId, 6), -- EditAnnouncement
+                (@adminId, 7), -- DeleteAnnouncement
+                (@adminId, 8), -- ManageBilling
+                (@adminId, 9), -- GenerateBills
+                (@adminId, 10), -- ProcessPayments
+                (@adminId, 11), -- ViewPaymentReports
+                (@adminId, 12), -- ManageFacilities
+                (@adminId, 13), -- ApproveReservations
+                (@adminId, 14), -- ManageServiceRequests
+                (@adminId, 15), -- AssignServiceRequests
+                (@adminId, 16), -- ResolveServiceRequests
+                (@adminId, 17), -- ManageDocuments
+                (@adminId, 18), -- UploadDocuments
+                (@adminId, 19), -- DeleteDocuments
+                (@adminId, 20), -- ManageForum
+                (@adminId, 21), -- ModerateForumPosts
+                (@adminId, 22), -- ManageSecurity
+                (@adminId, 23), -- ApproveVisitorPasses
+                (@adminId, 24), -- ManageVehicleRegistration
+                (@adminId, 25), -- AccessReports
+                (@adminId, 26)  -- ExportReports
+            ");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -324,6 +386,9 @@ namespace TheQuel.Data.Migrations
                 
             migrationBuilder.DropTable(
                 name: "AnnouncementRecipients");
+                
+            migrationBuilder.DropTable(
+                name: "UserPermissions");
 
             migrationBuilder.DropTable(
                 name: "Events");

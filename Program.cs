@@ -31,12 +31,17 @@ namespace TheQuel
             builder.Services.AddScoped<TheQuel.Core.IUserRepository, TheQuel.Data.UserRepository>();
             builder.Services.AddScoped<TheQuel.Core.IPropertyRepository, TheQuel.Data.PropertyRepository>();
             builder.Services.AddScoped<TheQuel.Core.IAnnouncementRepository, TheQuel.Data.AnnouncementRepository>();
+            builder.Services.AddScoped<TheQuel.Core.IPaymentRepository, TheQuel.Data.PaymentRepository>();
+
+            // Register unit of work
+            builder.Services.AddScoped<TheQuel.Core.IUnitOfWork, TheQuel.Data.UnitOfWork>();
 
             // Register services
             builder.Services.AddScoped<TheQuel.Services.IAuthService, TheQuel.Services.AuthService>();
             builder.Services.AddScoped<TheQuel.Services.IUserService, TheQuel.Services.UserService>();
             builder.Services.AddScoped<TheQuel.Services.IPropertyService, TheQuel.Services.PropertyService>();
             builder.Services.AddScoped<TheQuel.Services.IAnnouncementService, TheQuel.Services.AnnouncementService>();
+            builder.Services.AddScoped<TheQuel.Services.IPaymentService, TheQuel.Services.PaymentService>();
 
             // Add authentication and authorization
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

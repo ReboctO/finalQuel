@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\TheQuel.csproj": {}
+    "C:\\Users\\ii\\Documents\\finalQuel\\finalQuel\\TheQuel.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\TheQuel.csproj": {
+    "C:\\Users\\ii\\Documents\\finalQuel\\finalQuel\\TheQuel.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\TheQuel.csproj",
+        "projectUniqueName": "C:\\Users\\ii\\Documents\\finalQuel\\finalQuel\\TheQuel.csproj",
         "projectName": "TheQuel",
-        "projectPath": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\TheQuel.csproj",
-        "packagesPath": "C:\\Users\\User\\.nuget\\packages",
-        "outputPath": "C:\\Users\\User\\Desktop\\ASP_PROJECT\\finalQuel\\obj\\",
+        "projectPath": "C:\\Users\\ii\\Documents\\finalQuel\\finalQuel\\TheQuel.csproj",
+        "packagesPath": "C:\\Users\\ii\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ii\\Documents\\finalQuel\\finalQuel\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\ii\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -121,7 +121,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.407/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
