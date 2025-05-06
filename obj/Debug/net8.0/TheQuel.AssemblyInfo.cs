@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TheQuel")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88899623e319465636b62f2b6679f9daa46658b3")]
 [assembly: System.Reflection.AssemblyProductAttribute("TheQuel")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TheQuel")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -158,3 +158,4 @@ C:\Users\User\Desktop\ASP_PROJECT\TheQuel\bin\Debug\net8.0\runtimes\win\lib\net6
 C:\Users\User\Desktop\ASP_PROJECT\TheQuel\bin\Debug\net8.0\runtimes\browser\lib\net8.0\System.Text.Encodings.Web.dll
 C:\Users\User\Desktop\ASP_PROJECT\TheQuel\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
 C:\Users\User\Desktop\ASP_PROJECT\TheQuel\obj\Debug\net8.0\TheQuel.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\User\Desktop\ASP_PROJECT\TheQuel\obj\Debug\net8.0\TheQuel.sourcelink.json

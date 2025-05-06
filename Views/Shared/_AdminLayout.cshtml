@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
     <link rel="stylesheet" href="~/css/admin.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body id="page-top">
     <!-- Page Wrapper -->
@@ -53,7 +54,7 @@
                 </li>
 
                 <!-- Nav Item - Announcements -->
-                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Announcements" || ViewContext.RouteData.Values["Action"]?.ToString() == "CreateAnnouncement" ? "active" : "")">
+                <li class="nav-item @(ViewContext.RouteData.Values["Action"]?.ToString() == "Announcements" || ViewContext.RouteData.Values["Action"]?.ToString() == "CreateAnnouncement" || ViewContext.RouteData.Values["Action"]?.ToString() == "EditAnnouncement" ? "active" : "")">
                     <a class="nav-link" asp-controller="Admin" asp-action="Announcements">
                         <i class="bi bi-megaphone-fill"></i>
                         <span>Announcements</span>
@@ -122,7 +123,7 @@
                 <!-- Sidebar Toggler (Sidebar) -->
                 <div class="text-center d-none d-md-inline">
                     <button class="rounded-circle border-0" id="sidebarToggle" type="button">
-                        <i class="bi bi-arrow-left"></i>
+                        <i class="bi bi-chevron-left"></i>
                     </button>
                 </div>
             </ul>
@@ -152,6 +153,14 @@
                                 </button>
                             </div>
                         </form>
+                    }
+                    else
+                    {
+                        <div class="me-auto">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-link text-primary">
+                                <i class="bi bi-house-fill"></i> Return to Home
+                            </a>
+                        </div>
                     }
 
                     <!-- Topbar Navbar -->
@@ -285,6 +294,11 @@
                         else
                         {
                             <li class="nav-item">
+                                <a class="nav-link" asp-controller="AdminAccount" asp-action="Login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Admin Login
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-controller="Home" asp-action="Index">
                                     <i class="bi bi-house"></i> Back to Homepage
                                 </a>
@@ -341,6 +355,31 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/admin.js" asp-append-version="true"></script>
+    
+    <script>
+        // Enhanced sidebar toggle functionality
+        $(document).ready(function() {
+            $("#sidebarToggle, #sidebarToggleTop").on('click', function(e) {
+                $("body").toggleClass("sidebar-toggled");
+                $(".sidebar").toggleClass("toggled");
+                
+                if ($(".sidebar").hasClass("toggled")) {
+                    $('.sidebar .collapse').collapse('hide');
+                    $('#sidebarToggle i').removeClass('bi-chevron-left').addClass('bi-chevron-right');
+                } else {
+                    $('#sidebarToggle i').removeClass('bi-chevron-right').addClass('bi-chevron-left');
+                }
+            });
+            
+            // Close any open menu accordions when window is resized below 768px
+            $(window).resize(function() {
+                if ($(window).width() < 768) {
+                    $('.sidebar .collapse').collapse('hide');
+                }
+            });
+        });
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html> 

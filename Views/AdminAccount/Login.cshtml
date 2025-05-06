@@ -37,9 +37,9 @@
                         </div>
                         
                         <div class="form-group mb-3">
-                            <div class="custom-control custom-checkbox small">
-                                <input asp-for="RememberMe" class="custom-control-input" id="customCheck" />
-                                <label class="custom-control-label" for="customCheck">Remember Me</label>
+                            <div class="form-check">
+                                <input asp-for="RememberMe" class="form-check-input" id="customCheck" />
+                                <label class="form-check-label" for="customCheck">Remember Me</label>
                             </div>
                         </div>
                         
@@ -58,7 +58,10 @@
                     
                     <hr>
                     <div class="text-center">
-                        <a class="small" asp-controller="Account" asp-action="ForgotPassword">Forgot Password?</a>
+                        <a class="small" asp-controller="AdminAccount" asp-action="ForgotPassword">Forgot Password?</a>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a class="small" asp-controller="Admin" asp-action="Dashboard">Admin Dashboard</a>
                     </div>
                     <div class="text-center mt-3">
                         <p class="small text-danger mb-0"><i class="bi bi-exclamation-triangle"></i> Unauthorized access attempts are monitored and logged</p>
@@ -71,6 +74,10 @@
         </div>
     </div>
 </div>
+
+@section Styles {
+    <!-- Login page specific styles would go here -->
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

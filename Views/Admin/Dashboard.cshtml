@@ -127,7 +127,7 @@
                             </a>
                         </div>
                         <div class="col-md-3 text-center mb-4">
-                            <a href="#" class="btn btn-outline-primary btn-lg d-block">
+                            <a asp-controller="Admin" asp-action="Settings" class="btn btn-outline-primary btn-lg d-block">
                                 <i class="bi bi-gear"></i><br>Settings
                             </a>
                         </div>
@@ -178,15 +178,18 @@
                 <div class="card-body">
                     <div class="alert alert-warning">
                         <i class="bi bi-exclamation-triangle"></i> 5 payments are overdue
+                        <a href="#" class="alert-link float-end">View <i class="bi bi-arrow-right"></i></a>
                     </div>
                     <div class="alert alert-info">
                         <i class="bi bi-info-circle"></i> 3 new service requests require attention
+                        <a href="#" class="alert-link float-end">View <i class="bi bi-arrow-right"></i></a>
                     </div>
                     <div class="alert alert-success">
                         <i class="bi bi-check-circle"></i> Monthly backups completed successfully
                     </div>
                     <div class="alert alert-primary">
                         <i class="bi bi-bell"></i> Community meeting scheduled for tomorrow
+                        <a href="#" class="alert-link float-end">View <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -198,6 +201,7 @@
     <script>
         $(document).ready(function() {
             // Initialize any dashboard charts or functionality here
+            console.log("Dashboard loaded successfully!");
         });
     </script>
 } 

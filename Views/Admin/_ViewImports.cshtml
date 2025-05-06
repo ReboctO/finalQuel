@@ -1,0 +1,11 @@
+@using TheQuel.Core
+@using TheQuel.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    // Ignore the Styles section if it's not defined in a view
+    if (!IsSectionDefined("Styles"))
+    {
+        IgnoreSection("Styles");
+    }
+} 
