@@ -1,0 +1,135 @@
+@model PaymentReportsViewModel
+@{
+    ViewData["Title"] = "Payment Reports";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800">Payment Reports</h1>
+            <p class="mb-0">Generate and view payment reports.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="BillingDashboard" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Billing Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">Report Generator</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="GeneratePaymentReport" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Report Type</label>
+                            <select asp-for="ReportType" asp-items="Model.ReportTypes" class="form-select" required>
+                                <option value="">Select Report Type</option>
+                            </select>
+                            <span asp-validation-for="ReportType" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 report-option" id="monthly-options">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Month</label>
+                            <select asp-for="Month" asp-items="Model.Months" class="form-select">
+                                <option value="">Select Month</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Year</label>
+                            <select asp-for="Year" asp-items="Model.Years" class="form-select">
+                                <option value="">Select Year</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 report-option" id="yearly-options">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Year</label>
+                            <select asp-for="Year" asp-items="Model.Years" class="form-select">
+                                <option value="">Select Year</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 report-option" id="status-options">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Payment Status</label>
+                            <select asp-for="StatusId" asp-items="Model.PaymentStatuses" class="form-select">
+                                <option value="">Select Status</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3 report-option" id="type-options">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">Payment Type</label>
+                            <select asp-for="TypeId" asp-items="Model.PaymentTypes" class="form-select">
+                                <option value="">Select Type</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-file-earmark-text"></i> Generate Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Initially hide all report options
+            $(".report-option").hide();
+            
+            // Set default values
+            $("#Month").val("@Model.CurrentMonth");
+            $("#Year").val("@Model.CurrentYear");
+            
+            // Show/hide options based on report type selection
+            $("#ReportType").change(function() {
+                var selectedType = $(this).val();
+                $(".report-option").hide();
+                
+                switch(selectedType) {
+                    case "monthly":
+                        $("#monthly-options").show();
+                        break;
+                    case "yearly":
+                        $("#yearly-options").show();
+                        break;
+                    case "status":
+                        $("#status-options").show();
+                        break;
+                    case "type":
+                        $("#type-options").show();
+                        break;
+                }
+            });
+        });
+    </script>
+} 
