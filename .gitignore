@@ -1,3 +1,51 @@
-# Ignore build output folders
+## Ignore build output directories
 bin/
 obj/
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+## Rider & VS Code
+.idea/
+.vscode/
+
+## ASP.NET secrets
+**/appsettings.Development.json
+**/appsettings.Local.json
+secrets.json
+
+## Logs
+*.log
+
+## Dependency directories
+packages/
+node_modules/
+
+## Dotnet CLI
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Visual Studio generated folders
+.vs/
+TestResults/
+
+## Resharper
+_ReSharper*/
+*.DotSettings.user
+
+## Other common unwanted files
+*.swp
+*.tmp
+*.bak
+*.ncb
+*.cache
+*.dbmdl
+*.DS_Store
+Thumbs.db
+
+# Optional: ignore publish output
+publish/
