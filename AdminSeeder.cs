@@ -3,6 +3,8 @@ using System;
 using System.Threading.Tasks;
 using TheQuel.Core;
 using TheQuel.Services;
+using TheQuel.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace TheQuel
 {
@@ -11,38 +13,72 @@ namespace TheQuel
         public static async Task SeedAdminUser(IServiceProvider serviceProvider)
         {
             using var scope = serviceProvider.CreateScope();
-            var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
-            var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             
-            // Check if admin exists
-            var adminEmail = "admin@thequel.com";
-            var existingAdmin = await userRepository.GetByEmailAsync(adminEmail);
-            
-            if (existingAdmin == null)
+            try
             {
-                try
+                Console.WriteLine("Attempting to create admin user with direct SQL...");
+                
+                // First, check if the admin user already exists
+                const string adminEmail = "admin@thequel.com";
+                var adminExists = await dbContext.Users.AnyAsync(u => u.Email == adminEmail);
+                
+                if (adminExists)
                 {
-                    // Create admin user
-                    var admin = await authService.RegisterAsync(
-                        firstName: "System",
-                        lastName: "Administrator",
-                        email: adminEmail,
-                        password: "Admin123!",
-                        role: UserRole.Admin,
-                        address: "System Address",
-                        phoneNumber: "123-456-7890"
-                    );
+                    // Delete the existing admin user and their permissions
+                    Console.WriteLine("Removing existing admin user...");
+                    await dbContext.Database.ExecuteSqlRawAsync(
+                        "DELETE FROM UserPermissions WHERE UserId IN (SELECT Id FROM Users WHERE Email = {0})", 
+                        adminEmail);
                     
-                    Console.WriteLine($"Admin user created successfully: {admin.Email}");
+                    await dbContext.Database.ExecuteSqlRawAsync(
+                        "DELETE FROM Users WHERE Email = {0}", 
+                        adminEmail);
                 }
-                catch (Exception ex)
+                
+                // Generate BCrypt hash for "Admin123!"
+                string passwordHash = BCrypt.Net.BCrypt.HashPassword("Admin123!");
+                
+                // Insert the admin user with SQL
+                Console.WriteLine("Creating admin user...");
+                await dbContext.Database.ExecuteSqlRawAsync(@"
+                    INSERT INTO Users (FirstName, LastName, Email, Password, PhoneNumber, Address, Role, CreatedAt, IsActive)
+                    VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8});
+                    SELECT LAST_INSERT_ID();",
+                    "System", "Administrator", adminEmail, passwordHash, "123-456-7890", 
+                    "System Address", (int)UserRole.Admin, DateTime.Now, true);
+                
+                // Get the new admin user's ID
+                var adminUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+                
+                if (adminUser != null)
                 {
-                    Console.WriteLine($"Error creating admin user: {ex.Message}");
+                    Console.WriteLine($"Admin user created successfully with ID: {adminUser.Id}");
+                    
+                    // Add all permissions
+                    foreach (Permission permission in Enum.GetValues(typeof(Permission)))
+                    {
+                        await dbContext.Database.ExecuteSqlRawAsync(
+                            "INSERT INTO UserPermissions (UserId, Permission) VALUES ({0}, {1})",
+                            adminUser.Id, (int)permission);
+                    }
+                    
+                    Console.WriteLine("Admin permissions granted successfully.");
+                    Console.WriteLine("------------------------");
+                    Console.WriteLine("LOGIN CREDENTIALS:");
+                    Console.WriteLine("Email: admin@thequel.com");
+                    Console.WriteLine("Password: Admin123!");
+                    Console.WriteLine("------------------------");
+                }
+                else
+                {
+                    Console.WriteLine("ERROR: Admin user was not created properly!");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Admin user already exists.");
+                Console.WriteLine($"Error creating admin user: {ex.Message}");
+                Console.WriteLine($"Exception details: {ex.ToString()}");
             }
         }
     }

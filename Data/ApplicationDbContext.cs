@@ -19,6 +19,8 @@ namespace TheQuel.Data
         public DbSet<UserPermission> UserPermissions { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<AnnouncementRecipient> AnnouncementRecipients { get; set; }
+        public DbSet<Facility> Facilities { get; set; }
+        public DbSet<FacilityReservation> FacilityReservations { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -100,6 +102,27 @@ namespace TheQuel.Data
                 .HasOne(ar => ar.User)
                 .WithMany()
                 .HasForeignKey(ar => ar.UserId);
+                
+            // Configure Facility entity
+            modelBuilder.Entity<Facility>()
+                .HasIndex(f => f.Name)
+                .IsUnique();
+                
+            // Configure FacilityReservation entity
+            modelBuilder.Entity<FacilityReservation>()
+                .HasOne(fr => fr.Facility)
+                .WithMany(f => f.Reservations)
+                .HasForeignKey(fr => fr.FacilityId);
+                
+            modelBuilder.Entity<FacilityReservation>()
+                .HasOne(fr => fr.User)
+                .WithMany()
+                .HasForeignKey(fr => fr.UserId);
+                
+            modelBuilder.Entity<FacilityReservation>()
+                .HasOne(fr => fr.ReviewedByUser)
+                .WithMany()
+                .HasForeignKey(fr => fr.ReviewedByUserId);
         }
     }
 } 

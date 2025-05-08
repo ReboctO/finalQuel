@@ -31,9 +31,11 @@ namespace TheQuel.Controllers
         }
         
         [HttpGet("login")]
-        public IActionResult Login(string? returnUrl = null)
+        public async Task<IActionResult> Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+            // Ensure admin user exists before showing login page
+            await EnsureAdminUserExistsAsync();
             return View();
         }
         
@@ -48,15 +50,29 @@ namespace TheQuel.Controllers
                 return View(model);
             }
             
-            // TODO: In production, implement rate limiting for failed login attempts
-            // LOG: Attempt to login as admin with email: {model.Email}
+            // Ensure admin user exists
+            await EnsureAdminUserExistsAsync();
             
+            // Check if user exists first
+            var existingUser = await _userService.GetUserByEmailAsync(model.Email);
+            if (existingUser == null)
+            {
+                ModelState.AddModelError(string.Empty, $"No account found with email: {model.Email}");
+                return View(model);
+            }
+            
+            // Now try login
             var user = await _authService.LoginAsync(model.Email, model.Password);
             
-            if (user == null || user.Role != UserRole.Admin)
+            if (user == null)
             {
-                // LOG: Failed login attempt for admin with email: {model.Email}
-                ModelState.AddModelError(string.Empty, "Invalid login attempt. Only administrators can login here.");
+                ModelState.AddModelError(string.Empty, "Invalid password.");
+                return View(model);
+            }
+            
+            if (user.Role != UserRole.Admin)
+            {
+                ModelState.AddModelError(string.Empty, $"Account exists but with role {user.Role}, not Admin.");
                 return View(model);
             }
             
@@ -67,6 +83,38 @@ namespace TheQuel.Controllers
             TempData["SuccessMessage"] = $"Welcome back, {user.FirstName}! You are now logged in.";
             
             return RedirectToLocal(returnUrl);
+        }
+        
+        // New method to ensure admin user exists
+        private async Task EnsureAdminUserExistsAsync()
+        {
+            try
+            {
+                const string adminEmail = "admin@thequel.com";
+                var adminExists = await _userService.GetUserByEmailAsync(adminEmail);
+                
+                if (adminExists == null)
+                {
+                    // Create default admin if it doesn't exist
+                    await _userService.CreateUserAsync(
+                        "System", 
+                        "Administrator", 
+                        adminEmail, 
+                        "Admin123!", // Default password
+                        UserRole.Admin, 
+                        "System Address", 
+                        "123-456-7890"
+                    );
+                    
+                    // Add success message
+                    TempData["SuccessMessage"] = "Default admin account has been created. Please login with admin@thequel.com and password Admin123!";
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't stop execution
+                Console.WriteLine($"Error ensuring admin user exists: {ex.Message}");
+            }
         }
         
         [HttpGet("register")]
