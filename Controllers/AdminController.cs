@@ -589,9 +589,8 @@ namespace TheQuel.Controllers
                 return View(model);
             }
         }
-        
         [RequirePermission(Permission.ViewPaymentReports)]
-        public async Task<IActionResult> PaymentReports()
+        public IActionResult PaymentReports()
         {
             var model = new PaymentReportsViewModel
             {
