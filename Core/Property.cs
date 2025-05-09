@@ -6,6 +6,7 @@ namespace TheQuel.Core
     public class Property
     {
         public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string LotNumber { get; set; } = string.Empty;
         public string BlockNumber { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
@@ -18,7 +19,7 @@ namespace TheQuel.Core
         public DateTime? UpdatedAt { get; set; }
         
         // Navigation properties
-        public virtual User Owner { get; set; } = null!;
+        public virtual User? Owner { get; set; }
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
     
@@ -26,7 +27,7 @@ namespace TheQuel.Core
     {
         Available,
         Sold,
-        UnderConstruction,
-        Reserved
+        Reserved,
+        UnderMaintenance
     }
 } 

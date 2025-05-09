@@ -1,73 +1,72 @@
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TheQuel.Core;
 
 namespace TheQuel.Data
 {
-    public class Repository<T> : IRepository<T> where T : class
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
-        protected readonly ApplicationDbContext _context;
-        
-        public Repository(ApplicationDbContext context)
+        protected readonly DbContext _context;
+        private readonly DbSet<TEntity> _entities;
+
+        public Repository(DbContext context)
         {
             _context = context;
+            _entities = context.Set<TEntity>();
         }
-        
-        public async Task<T?> GetByIdAsync(int id)
+
+        public virtual async Task<TEntity> GetAsync(int id)
         {
-            return await _context.Set<T>().FindAsync(id);
+            return await _entities.FindAsync(id);
         }
-        
-        public async Task<IEnumerable<T>> GetAllAsync()
+
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            return await _context.Set<T>().ToListAsync();
+            return await _entities.ToListAsync();
         }
-        
-        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
+
+        public virtual async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate)
         {
-            return await _context.Set<T>().Where(predicate).ToListAsync();
+            return await _entities.Where(predicate).ToListAsync();
         }
-        
-        public async Task AddAsync(T entity)
+
+        public virtual async Task AddAsync(TEntity entity)
         {
-            await _context.Set<T>().AddAsync(entity);
+            await _entities.AddAsync(entity);
+        }
+
+        public virtual void Remove(TEntity entity)
+        {
+            _entities.Remove(entity);
+        }
+
+        public virtual void Update(TEntity entity)
+        {
+            _entities.Update(entity);
+        }
+
+        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+        {
+            await _entities.AddRangeAsync(entities);
             await _context.SaveChangesAsync();
         }
-        
-        public async Task AddRangeAsync(IEnumerable<T> entities)
+
+        public async Task RemoveRangeAsync(IEnumerable<TEntity> entities)
         {
-            await _context.Set<T>().AddRangeAsync(entities);
+            _entities.RemoveRange(entities);
             await _context.SaveChangesAsync();
         }
-        
-        public async Task UpdateAsync(T entity)
-        {
-            _context.Set<T>().Update(entity);
-            await _context.SaveChangesAsync();
-        }
-        
-        public async Task RemoveAsync(T entity)
-        {
-            _context.Set<T>().Remove(entity);
-            await _context.SaveChangesAsync();
-        }
-        
-        public async Task RemoveRangeAsync(IEnumerable<T> entities)
-        {
-            _context.Set<T>().RemoveRange(entities);
-            await _context.SaveChangesAsync();
-        }
-        
-        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+
+        public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? predicate = null)
         {
             if (predicate == null)
-                return await _context.Set<T>().CountAsync();
+                return await _entities.CountAsync();
             
-            return await _context.Set<T>().CountAsync(predicate);
+            return await _entities.CountAsync(predicate);
         }
     }
 } 

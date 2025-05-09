@@ -1,0 +1,212 @@
+@model TheQuel.Models.PaymentReportsViewModel
+
+@{
+    ViewData["Title"] = "Payment History";
+}
+
+<div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Payment History</h6>
+        </div>
+        <div class="card-body">
+            <!-- Report Filters -->
+            <form id="reportForm" class="mb-4">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="ReportType">Report Type</label>
+                            <select asp-for="ReportType" asp-items="Model.ReportTypes" class="form-control">
+                                <option value="">-- Select Type --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="Year">Year</label>
+                            <select asp-for="Year" asp-items="Model.Years" class="form-control">
+                                <option value="">-- Select Year --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label asp-for="Month">Month</label>
+                            <select asp-for="Month" asp-items="Model.Months" class="form-control">
+                                <option value="">-- Select Month --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Payment Status</label>
+                            <select asp-for="StatusId" asp-items="Model.PaymentStatuses" class="form-control">
+                                <option value="">All Statuses</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>Payment Type</label>
+                            <select asp-for="TypeId" asp-items="Model.PaymentTypes" class="form-control">
+                                <option value="">All Types</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn btn-primary btn-block">Generate Report</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Report Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card border-left-primary">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Amount</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalAmount.ToString("C")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-left-success">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Paid Amount</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PaidAmount.ToString("C")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-left-warning">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Pending Amount</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingAmount.ToString("C")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-left-danger">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                        Overdue Amount</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.OverdueAmount.ToString("C")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="mb-3">
+                <button id="exportPdf" class="btn btn-danger">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+                <button id="exportExcel" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+            </div>
+
+            <!-- Report Data Table -->
+            <div class="table-responsive">
+                <table class="table table-bordered" id="paymentsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Due Date</th>
+                            <th>Payment Date</th>
+                            <th>Status</th>
+                            <th>Reference #</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var payment in Model.ReportData)
+                        {
+                            <tr>
+                                <td>@payment.Property.Name</td>
+                                <td>@payment.Type</td>
+                                <td>@payment.Amount.ToString("C")</td>
+                                <td>@payment.DueDate.ToShortDateString()</td>
+                                <td>@(payment.PaymentDate?.ToShortDateString() ?? "-")</td>
+                                <td>
+                                    <span class="badge badge-@(payment.Status == TheQuel.Core.PaymentStatus.Pending ? "warning" : 
+                                                             payment.Status == TheQuel.Core.PaymentStatus.Paid ? "success" : 
+                                                             "danger")">
+                                        @payment.Status
+                                    </span>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(payment.ReferenceNumber) ? "-" : payment.ReferenceNumber)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize select2 for better dropdown experience
+            $('select').select2({
+                theme: 'bootstrap4'
+            });
+
+            // Initialize DataTable
+            var table = $('#paymentsTable').DataTable({
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ]
+            });
+
+            // Handle report form submission
+            $('#reportForm').submit(function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+
+                $.get('@Url.Action("PaymentHistory")', formData)
+                    .done(function(response) {
+                        // Update the view with new data
+                        location.reload();
+                    })
+                    .fail(function() {
+                        alert('Failed to generate report. Please try again.');
+                    });
+            });
+
+            // Handle export buttons
+            $('#exportPdf').click(function() {
+                table.button('3').trigger();
+            });
+
+            $('#exportExcel').click(function() {
+                table.button('2').trigger();
+            });
+        });
+    </script>
+} 

@@ -1,0 +1,261 @@
+@model TheQuel.Models.BillingDashboardViewModel
+
+@{
+    ViewData["Title"] = "Billing Dashboard";
+}
+
+<div class="container-fluid">
+    <h2 class="mb-4">Billing Dashboard</h2>
+
+    <div class="row">
+        <!-- Summary Cards -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Yearly Payments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalYearlyPayments.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Monthly Payments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalMonthlyPayments.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Payments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingPaymentsCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Overdue Payments</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.OverduePaymentsCount</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Actions -->
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="@Url.Action("CreateBill")" class="btn btn-primary mr-2">
+                        <i class="fas fa-plus"></i> Create New Bill
+                    </a>
+                    <a href="@Url.Action("PaymentHistory")" class="btn btn-info mr-2">
+                        <i class="fas fa-history"></i> Payment History
+                    </a>
+                    <button class="btn btn-success" id="notifyHomeowners" disabled>
+                        <i class="fas fa-bell"></i> Notify Homeowners
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Bills -->
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Pending Bills</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="pendingBillsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="selectAll">
+                                            <label class="custom-control-label" for="selectAll"></label>
+                                        </div>
+                                    </th>
+                                    <th>Property</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var bill in Model.PendingBills)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input bill-checkbox" 
+                                                       id="bill_@bill.Id" value="@bill.Id">
+                                                <label class="custom-control-label" for="bill_@bill.Id"></label>
+                                            </div>
+                                        </td>
+                                        <td>@bill.Property.Name</td>
+                                        <td>@bill.Type</td>
+                                        <td>@bill.Amount.ToString("C")</td>
+                                        <td>@bill.DueDate.ToShortDateString()</td>
+                                        <td>
+                                            <span class="badge badge-@(bill.Status == TheQuel.Core.PaymentStatus.Pending ? "warning" : 
+                                                                     bill.Status == TheQuel.Core.PaymentStatus.Paid ? "success" : 
+                                                                     "danger")">
+                                                @bill.Status
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success mark-as-paid" 
+                                                    data-id="@bill.Id" 
+                                                    data-toggle="modal" 
+                                                    data-target="#markAsPaidModal">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <a href="#" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mark as Paid Modal -->
+<div class="modal fade" id="markAsPaidModal" tabindex="-1" role="dialog" aria-labelledby="markAsPaidModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="markAsPaidModalLabel">Mark Bill as Paid</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="markAsPaidForm">
+                <div class="modal-body">
+                    <input type="hidden" id="paymentId" name="id" />
+                    <div class="form-group">
+                        <label for="referenceNumber">Reference Number</label>
+                        <input type="text" class="form-control" id="referenceNumber" name="referenceNumber" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Mark as Paid</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#pendingBillsTable').DataTable();
+
+            // Handle select all checkbox
+            $('#selectAll').change(function() {
+                $('.bill-checkbox').prop('checked', $(this).prop('checked'));
+                updateNotifyButton();
+            });
+
+            // Handle individual checkboxes
+            $('.bill-checkbox').change(function() {
+                updateNotifyButton();
+            });
+
+            // Update notify button state
+            function updateNotifyButton() {
+                var checkedCount = $('.bill-checkbox:checked').length;
+                $('#notifyHomeowners').prop('disabled', checkedCount === 0);
+            }
+
+            // Handle mark as paid button click
+            $('.mark-as-paid').click(function() {
+                var paymentId = $(this).data('id');
+                $('#paymentId').val(paymentId);
+            });
+
+            // Handle mark as paid form submission
+            $('#markAsPaidForm').submit(function(e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+
+                $.post('@Url.Action("MarkAsPaid")', formData)
+                    .done(function() {
+                        location.reload();
+                    })
+                    .fail(function() {
+                        alert('Failed to mark payment as paid. Please try again.');
+                    });
+            });
+
+            // Handle notify homeowners button click
+            $('#notifyHomeowners').click(function() {
+                var selectedIds = $('.bill-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+
+                $.post('@Url.Action("NotifyHomeowners")', { paymentIds: selectedIds })
+                    .done(function(response) {
+                        if (response.success) {
+                            alert('Notifications sent successfully!');
+                        } else {
+                            alert('Failed to send notifications. Please try again.');
+                        }
+                    })
+                    .fail(function() {
+                        alert('Failed to send notifications. Please try again.');
+                    });
+            });
+        });
+    </script>
+} 

@@ -260,6 +260,56 @@ namespace TheQuel.Data.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "PaymentHistory",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PaymentId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    Action = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    PreviousStatus = table.Column<int>(type: "int", nullable: true),
+                    NewStatus = table.Column<int>(type: "int", nullable: true),
+                    PreviousAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    NewAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PaymentHistory_Payments_PaymentId",
+                        column: x => x.PaymentId,
+                        principalTable: "Payments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_PaymentHistory_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BillingSettings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Key = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BillingSettings", x => x.Id);
+                });
+
             // Create indexes
             migrationBuilder.CreateIndex(
                 name: "IX_Complaints_AssignedToId",
@@ -330,6 +380,22 @@ namespace TheQuel.Data.Migrations
                 columns: new[] { "UserId", "Permission" },
                 unique: true);
 
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentHistory_PaymentId",
+                table: "PaymentHistory",
+                column: "PaymentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentHistory_UserId",
+                table: "PaymentHistory",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BillingSettings_Key",
+                table: "BillingSettings",
+                column: "Key",
+                unique: true);
+
             // Seed admin user
             migrationBuilder.InsertData(
                 table: "Users",
@@ -371,6 +437,20 @@ namespace TheQuel.Data.Migrations
                 (@adminId, 25), -- AccessReports
                 (@adminId, 26)  -- ExportReports
             ");
+
+            // Add default billing settings
+            migrationBuilder.InsertData(
+                table: "BillingSettings",
+                columns: new[] { "Key", "Value", "Description", "Type", "CreatedAt" },
+                values: new object[,]
+                {
+                    { "LatePaymentFeePercentage", "5", "Late payment fee percentage", "Decimal", DateTime.Now },
+                    { "GracePeriodDays", "5", "Number of days after due date before late fee applies", "Integer", DateTime.Now },
+                    { "ReminderDaysBeforeDue", "7,3,1", "Days before due date to send reminders (comma-separated)", "String", DateTime.Now },
+                    { "MaxReminderCount", "3", "Maximum number of reminders to send per bill", "Integer", DateTime.Now },
+                    { "NotificationMethods", "Email,SMS", "Available notification methods (comma-separated)", "String", DateTime.Now },
+                    { "DefaultDueDateDays", "30", "Default number of days for payment due date from bill creation", "Integer", DateTime.Now }
+                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -401,6 +481,12 @@ namespace TheQuel.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "PaymentHistory");
+
+            migrationBuilder.DropTable(
+                name: "BillingSettings");
         }
     }
 } 

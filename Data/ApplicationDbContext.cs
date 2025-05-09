@@ -13,6 +13,8 @@ namespace TheQuel.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Property> Properties { get; set; }
         public DbSet<Payment> Payments { get; set; }
+        public DbSet<PaymentHistory> PaymentHistory { get; set; }
+        public DbSet<BillingSetting> BillingSettings { get; set; }
         public DbSet<Complaint> Complaints { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<EventAttendee> EventAttendees { get; set; }
@@ -47,6 +49,34 @@ namespace TheQuel.Data
                 .HasOne(p => p.User)
                 .WithMany(u => u.Payments)
                 .HasForeignKey(p => p.UserId);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasColumnType("decimal(18,2)");
+
+            // Configure PaymentHistory entity
+            modelBuilder.Entity<PaymentHistory>()
+                .HasOne(ph => ph.Payment)
+                .WithMany(p => p.History)
+                .HasForeignKey(ph => ph.PaymentId);
+
+            modelBuilder.Entity<PaymentHistory>()
+                .HasOne(ph => ph.User)
+                .WithMany()
+                .HasForeignKey(ph => ph.UserId);
+
+            modelBuilder.Entity<PaymentHistory>()
+                .Property(ph => ph.PreviousAmount)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<PaymentHistory>()
+                .Property(ph => ph.NewAmount)
+                .HasColumnType("decimal(18,2)");
+
+            // Configure BillingSetting entity
+            modelBuilder.Entity<BillingSetting>()
+                .HasIndex(bs => bs.Key)
+                .IsUnique();
                 
             // Configure Complaint entity
             modelBuilder.Entity<Complaint>()

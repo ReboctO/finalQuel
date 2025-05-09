@@ -4,10 +4,13 @@ namespace TheQuel.Core
 {
     public interface IUnitOfWork
     {
-        IUserRepository UserRepository { get; }
-        IPropertyRepository PropertyRepository { get; }
-        IPaymentRepository PaymentRepository { get; }
-        
-        Task<int> SaveChangesAsync();
+        IPaymentRepository Payments { get; }
+        IPropertyRepository Properties { get; }
+        IUserRepository Users { get; }
+        IComplaintRepository Complaints { get; }
+        IEventRepository Events { get; }
+        IAnnouncementRepository Announcements { get; }
+        IFacilityRepository Facilities { get; }
+        Task<int> CompleteAsync();
     }
 } 

@@ -11,5 +11,7 @@ namespace TheQuel.Core
         Task<IEnumerable<Payment>> GetPaymentsByStatusAsync(PaymentStatus status);
         Task<IEnumerable<Payment>> GetPaymentsByDateRangeAsync(DateTime start, DateTime end);
         Task<IEnumerable<Payment>> GetOverduePaymentsAsync();
+        Task<Payment> AddAsync(Payment payment);
+        Task<Payment> GetByIdAsync(int id);
     }
 } 
