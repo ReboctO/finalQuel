@@ -1,0 +1,142 @@
+@model IEnumerable<TheQuel.Core.Facility>
+@{
+    ViewData["Title"] = "Facility Management";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800">Facility Management</h1>
+            <p class="mb-0">Manage community facilities and amenities.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="CreateFacility" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Add New Facility
+            </a>
+            <a asp-action="FacilityReservations" class="btn btn-outline-primary">
+                <i class="bi bi-calendar-check"></i> View Reservations
+            </a>
+        </div>
+    </div>
+
+    <!-- Facilities Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">All Facilities</h6>
+        </div>
+        <div class="card-body">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover" id="facilitiesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Type</th>
+                                <th>Capacity</th>
+                                <th>Location</th>
+                                <th>Hours</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var facility in Model)
+                            {
+                                <tr>
+                                    <td>@facility.Id</td>
+                                    <td>@facility.Name</td>
+                                    <td>@facility.Type</td>
+                                    <td>@facility.Capacity</td>
+                                    <td>@facility.Location</td>
+                                    <td>@facility.OpeningTime.ToString(@"hh\:mm") - @facility.ClosingTime.ToString(@"hh\:mm")</td>
+                                    <td>
+                                        @if (facility.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a asp-action="EditFacility" asp-route-id="@facility.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-facility-id="@facility.Id" data-facility-name="@facility.Name">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No facilities have been added yet. <a asp-action="CreateFacility">Add your first facility</a>.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Delete Facility</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="DeleteFacility" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="facilityId" />
+                    <p>Are you sure you want to delete <strong id="facilityName"></strong>?</p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> This action cannot be undone. All reservations associated with this facility will also be deleted.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Facility</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable
+            $('#facilitiesTable').DataTable({
+                order: [[1, 'asc']], // Sort by name
+                pageLength: 25,
+                language: {
+                    search: "Search facilities:"
+                }
+            });
+            
+            // Set facility ID and name in delete modal
+            $('#deleteModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var facilityId = button.data('facility-id');
+                var facilityName = button.data('facility-name');
+                
+                $('#facilityId').val(facilityId);
+                $('#facilityName').text(facilityName);
+            });
+        });
+    </script>
+} 

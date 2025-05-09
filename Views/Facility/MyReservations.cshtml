@@ -1,0 +1,143 @@
+@model FacilityReservationListViewModel
+@{
+    ViewData["Title"] = "My Reservations";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-gray-800">My Facility Reservations</h1>
+            <p class="mb-0">View and manage your facility reservations.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="Index" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Reservation
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Filter Reservations</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="MyReservations" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="0">Pending</option>
+                        <option value="1">Approved</option>
+                        <option value="2">Rejected</option>
+                        <option value="3">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="startDate" class="form-control" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="endDate" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reservations Table -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">My Reservations</h5>
+        </div>
+        <div class="card-body">
+            @if (Model.Reservations != null && Model.Reservations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Facility</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reservation in Model.Reservations)
+                            {
+                                <tr>
+                                    <td>@reservation.FacilityName</td>
+                                    <td>@reservation.Date</td>
+                                    <td>@reservation.StartTime - @reservation.EndTime</td>
+                                    <td>@reservation.Purpose</td>
+                                    <td>
+                                        @switch (reservation.Status)
+                                        {
+                                            case TheQuel.Core.ReservationStatus.Pending:
+                                                <span class="badge bg-warning">Pending</span>
+                                                break;
+                                            case TheQuel.Core.ReservationStatus.Approved:
+                                                <span class="badge bg-success">Approved</span>
+                                                break;
+                                            case TheQuel.Core.ReservationStatus.Rejected:
+                                                <span class="badge bg-danger">Rejected</span>
+                                                break;
+                                            case TheQuel.Core.ReservationStatus.Cancelled:
+                                                <span class="badge bg-secondary">Cancelled</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-action="ReservationDetails" asp-route-id="@reservation.Id" class="btn btn-sm btn-outline-primary" data-bs-toggle="tooltip" title="View reservation details">
+                                            <i class="bi bi-info-circle"></i> Details
+                                        </a>
+                                        @if (reservation.CanCancel)
+                                        {
+                                            <a asp-action="CancelReservation" asp-route-id="@reservation.Id" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="Cancel this reservation">
+                                                <i class="bi bi-x-circle"></i> Cancel
+                                            </a>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> You don't have any reservations yet. <a asp-action="Index">Browse facilities</a> to make a reservation.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+            
+            // Set the selected status in the dropdown
+            @if (Model.FilterStatus.HasValue)
+            {
+                <text>
+                $('select[name="status"]').val('@((int)Model.FilterStatus.Value)');
+                </text>
+            }
+        });
+    </script>
+} 

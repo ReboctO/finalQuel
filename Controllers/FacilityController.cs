@@ -349,7 +349,7 @@ namespace TheQuel.Controllers
         // POST: /Facility/CancelReservation/5
         [HttpPost, ActionName("CancelReservation")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CancelReservationConfirmed(int id)
+        public async Task<IActionResult> CancelReservationConfirmed(int id, string cancellationReason)
         {
             // Get current user ID
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -374,6 +374,22 @@ namespace TheQuel.Controllers
             
             try
             {
+                // Save the cancellation reason in the Notes field
+                if (!string.IsNullOrWhiteSpace(cancellationReason))
+                {
+                    // Update the reservation notes with the cancellation reason
+                    reservation.Notes = $"Cancellation reason: {cancellationReason}\n\nOriginal notes: {reservation.Notes}";
+                    await _reservationService.UpdateReservationAsync(
+                        id,
+                        reservation.ReservationDate,
+                        reservation.StartTime,
+                        reservation.EndTime,
+                        reservation.Purpose,
+                        reservation.ExpectedAttendees,
+                        reservation.Notes
+                    );
+                }
+                
                 await _reservationService.CancelReservationAsync(id);
                 TempData["SuccessMessage"] = "Your reservation has been cancelled successfully.";
             }

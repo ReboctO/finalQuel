@@ -1,0 +1,104 @@
+@model FacilityReservationViewModel
+@{
+    ViewData["Title"] = "Cancel Reservation";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Facilities</a></li>
+                    <li class="breadcrumb-item"><a asp-action="MyReservations">My Reservations</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Cancel Reservation</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">Cancel Reservation</h1>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="ReservationDetails" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Details
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Confirm Cancellation</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Are you sure you want to cancel this reservation? This action cannot be undone.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Facility</h6>
+                            <p>@Model.FacilityName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Date</h6>
+                            <p>@Model.Date</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Time</h6>
+                            <p>@Model.StartTime - @Model.EndTime (@Model.Duration)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Purpose</h6>
+                            <p>@Model.Purpose</p>
+                        </div>
+                    </div>
+                    
+                    <form asp-action="CancelReservation" method="post">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        
+                        <div class="mb-4">
+                            <label for="cancellationReason" class="form-label">Reason for Cancellation</label>
+                            <textarea name="cancellationReason" id="cancellationReason" class="form-control" rows="3" placeholder="Please provide a reason for cancellation (optional)"></textarea>
+                            <div class="form-text">Providing a reason helps us improve our facility services.</div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <a asp-action="ReservationDetails" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> No, Keep Reservation
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle"></i> Yes, Cancel Reservation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Cancellation Policy</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="bi bi-clock"></i> Reservations can be cancelled up to 24 hours before the scheduled time.
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-check-circle"></i> Pending reservations can be cancelled at any time.
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-info-circle"></i> Approved reservations that are cancelled may affect your future reservation privileges.
+                        </li>
+                        <li class="list-group-item">
+                            <i class="bi bi-calendar-x"></i> Repeated no-shows or late cancellations may result in temporary reservation restrictions.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,129 @@
+@model FacilityListViewModel
+@{
+    ViewData["Title"] = "Facility Reservations";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="h3 mb-0 text-gray-800">Facility Reservations</h1>
+            <p class="mb-0">Browse and reserve community facilities.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="MyReservations" class="btn btn-outline-primary">
+                <i class="bi bi-list-check"></i> My Reservations
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Filter Facilities</h5>
+        </div>
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="searchTerm" class="form-control" placeholder="Search facilities..." value="@Model.SearchTerm">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Facility Type</label>
+                    <select name="type" class="form-select" asp-items="Html.GetEnumSelectList<FacilityType>()">
+                        <option value="">All Types</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date</label>
+                    <input type="date" name="date" class="form-control" value="@(Model.SelectedDate?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Facilities Grid -->
+    <div class="row">
+        @if (Model.Facilities != null && Model.Facilities.Any())
+        {
+            foreach (var facility in Model.Facilities)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        @if (!string.IsNullOrEmpty(facility.ImageUrl))
+                        {
+                            <img src="@facility.ImageUrl" class="card-img-top" alt="@facility.Name" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="bg-light text-center py-5" style="height: 200px;">
+                                <i class="bi bi-building" style="font-size: 4rem;"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@facility.Name</h5>
+                            <span class="badge bg-info mb-2">@facility.TypeName</span>
+                            <p class="card-text text-muted small">@facility.Description.Substring(0, Math.Min(facility.Description.Length, 100))@(facility.Description.Length > 100 ? "..." : "")</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-people"></i> Capacity: @facility.Capacity
+                                </div>
+                                @if (facility.HourlyRate.HasValue && facility.HourlyRate.Value > 0)
+                                {
+                                    <div>
+                                        <i class="bi bi-currency-dollar"></i> @facility.HourlyRate.Value.ToString("C")/hr
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <span class="text-success">Free</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-between">
+                            <small class="text-muted">
+                                <i class="bi bi-clock"></i> @facility.OpeningTime - @facility.ClosingTime
+                            </small>
+                            <div>
+                                <a asp-action="Details" asp-route-id="@facility.Id" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-info-circle"></i> Details
+                                </a>
+                                <a asp-action="Reserve" asp-route-id="@facility.Id" asp-route-date="@Model.SelectedDate?.ToString("yyyy-MM-dd")" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-calendar-plus"></i> Reserve
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No facilities found matching your criteria. Try adjusting your filters.
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Set the selected facility type in the dropdown
+            @if (Model.FilterType.HasValue)
+            {
+                <text>
+                $('select[name="type"]').val('@((int)Model.FilterType.Value)');
+                </text>
+            }
+        });
+    </script>
+} 

@@ -19,17 +19,23 @@ namespace TheQuel.Controllers
         private readonly IPropertyService _propertyService;
         private readonly IAnnouncementService _announcementService;
         private readonly IPaymentService _paymentService;
+        private readonly IFacilityService _facilityService;
+        private readonly IFacilityReservationService _facilityReservationService;
         
         public AdminController(
             IUserService userService, 
             IPropertyService propertyService, 
             IAnnouncementService announcementService,
-            IPaymentService paymentService)
+            IPaymentService paymentService,
+            IFacilityService facilityService,
+            IFacilityReservationService facilityReservationService)
         {
             _userService = userService;
             _propertyService = propertyService;
             _announcementService = announcementService;
             _paymentService = paymentService;
+            _facilityService = facilityService;
+            _facilityReservationService = facilityReservationService;
         }
         
         public async Task<IActionResult> Dashboard()
@@ -723,29 +729,386 @@ namespace TheQuel.Controllers
         
         #region Facilities
         
-        public IActionResult FacilityReservations()
+        [RequirePermission(Permission.ManageFacilities)]
+        public async Task<IActionResult> FacilityManagement()
         {
-            return View();
+            var facilities = await _facilityService.GetAllFacilitiesAsync();
+            return View(facilities);
+        }
+        
+        [RequirePermission(Permission.ManageFacilities)]
+        public IActionResult CreateFacility()
+        {
+            return View(new FacilityCreateViewModel());
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult ApproveReservation(int id)
+        [RequirePermission(Permission.ManageFacilities)]
+        public async Task<IActionResult> CreateFacility(FacilityCreateViewModel model)
         {
-            // TODO: Implement reservation approval logic
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
             
-            TempData["SuccessMessage"] = "Reservation approved.";
-            return RedirectToAction(nameof(FacilityReservations));
+            try
+            {
+                await _facilityService.CreateFacilityAsync(
+                    model.Name,
+                    model.Description,
+                    model.Type,
+                    model.Capacity,
+                    model.Location,
+                    model.ImageUrl,
+                    model.HourlyRate,
+                    TimeSpan.Parse(model.OpeningTime),
+                    TimeSpan.Parse(model.ClosingTime),
+                    model.MaxDaysInAdvance,
+                    model.MaxReservationsPerUser,
+                    model.RequiresAdminApproval);
+                TempData["SuccessMessage"] = "Facility created successfully.";
+                return RedirectToAction(nameof(FacilityManagement));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+        
+        [RequirePermission(Permission.ManageFacilities)]
+        public async Task<IActionResult> EditFacility(int id)
+        {
+            var facility = await _facilityService.GetFacilityByIdAsync(id);
+            if (facility == null)
+            {
+                return NotFound();
+            }
+            
+            var viewModel = new FacilityEditViewModel
+            {
+                Id = facility.Id,
+                Name = facility.Name,
+                Description = facility.Description,
+                Type = facility.Type,
+                Capacity = facility.Capacity,
+                IsActive = facility.IsActive,
+                Location = facility.Location,
+                ImageUrl = facility.ImageUrl,
+                HourlyRate = facility.HourlyRate,
+                OpeningTime = facility.OpeningTime.ToString(@"hh\:mm"),
+                ClosingTime = facility.ClosingTime.ToString(@"hh\:mm"),
+                MaxDaysInAdvance = facility.MaxDaysInAdvance,
+                MaxReservationsPerUser = facility.MaxReservationsPerUser,
+                RequiresAdminApproval = facility.RequiresAdminApproval
+            };
+            
+            return View(viewModel);
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeclineReservation(int id, string reason)
+        [RequirePermission(Permission.ManageFacilities)]
+        public async Task<IActionResult> EditFacility(FacilityEditViewModel model)
         {
-            // TODO: Implement reservation decline logic
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
             
-            TempData["SuccessMessage"] = "Reservation declined.";
+            try
+            {
+                await _facilityService.UpdateFacilityAsync(
+                    model.Id,
+                    model.Name,
+                    model.Description,
+                    model.Type,
+                    model.Capacity,
+                    model.IsActive,
+                    model.Location,
+                    model.ImageUrl,
+                    model.HourlyRate,
+                    TimeSpan.Parse(model.OpeningTime),
+                    TimeSpan.Parse(model.ClosingTime),
+                    model.MaxDaysInAdvance,
+                    model.MaxReservationsPerUser,
+                    model.RequiresAdminApproval);
+                TempData["SuccessMessage"] = "Facility updated successfully.";
+                return RedirectToAction(nameof(FacilityManagement));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ManageFacilities)]
+        public async Task<IActionResult> DeleteFacility(int id)
+        {
+            try
+            {
+                await _facilityService.DeleteFacilityAsync(id);
+                TempData["SuccessMessage"] = "Facility deleted successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            
+            return RedirectToAction(nameof(FacilityManagement));
+        }
+        
+        #endregion
+        
+        #region Facility Reservations
+        
+        [RequirePermission(Permission.ApproveReservations)]
+        public async Task<IActionResult> FacilityReservations(ReservationStatus? status, string searchTerm, DateTime? startDate, DateTime? endDate, int? facilityId)
+        {
+            var reservations = await _facilityReservationService.GetAllReservationsAsync();
+            
+            // Apply filters
+            if (status.HasValue)
+            {
+                reservations = reservations.Where(r => r.Status == status.Value);
+            }
+            
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                reservations = reservations.Where(r => 
+                    r.User.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    r.User.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    r.User.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    r.Facility.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    r.Purpose.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+            
+            if (startDate.HasValue)
+            {
+                reservations = reservations.Where(r => r.ReservationDate >= startDate.Value.Date);
+            }
+            
+            if (endDate.HasValue)
+            {
+                reservations = reservations.Where(r => r.ReservationDate <= endDate.Value.Date);
+            }
+            
+            if (facilityId.HasValue)
+            {
+                reservations = reservations.Where(r => r.FacilityId == facilityId.Value);
+            }
+            
+            // Get facilities for dropdown
+            var facilities = await _facilityService.GetAllFacilitiesAsync();
+            var facilitySelectList = facilities.Select(f => new SelectListItem
+            {
+                Value = f.Id.ToString(),
+                Text = f.Name
+            }).ToList();
+            
+            // Add "All Facilities" option
+            facilitySelectList.Insert(0, new SelectListItem { Value = "", Text = "All Facilities" });
+            
+            var viewModel = new AdminReservationListViewModel
+            {
+                Reservations = reservations.Select(r => MapReservationToAdminViewModel(r)).ToList(),
+                FilterStatus = status,
+                SearchTerm = searchTerm,
+                StartDate = startDate,
+                EndDate = endDate,
+                FacilityId = facilityId,
+                Facilities = facilitySelectList
+            };
+            
+            return View(viewModel);
+        }
+        
+        [RequirePermission(Permission.ApproveReservations)]
+        public async Task<IActionResult> ReservationDetails(int id)
+        {
+            var reservation = await _facilityReservationService.GetReservationByIdAsync(id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+            
+            var viewModel = MapReservationToAdminDetailsViewModel(reservation);
+            return View(viewModel);
+        }
+        
+        [RequirePermission(Permission.ApproveReservations)]
+        public async Task<IActionResult> ReviewReservation(int id)
+        {
+            var reservation = await _facilityReservationService.GetReservationByIdAsync(id);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+            
+            // Check if the reservation is already reviewed
+            if (reservation.Status != ReservationStatus.Pending)
+            {
+                TempData["ErrorMessage"] = "This reservation has already been reviewed.";
+                return RedirectToAction(nameof(ReservationDetails), new { id = reservation.Id });
+            }
+            
+            var viewModel = new ReviewReservationViewModel
+            {
+                Id = reservation.Id,
+                FacilityName = reservation.Facility?.Name ?? "Unknown",
+                UserName = $"{reservation.User?.FirstName} {reservation.User?.LastName}",
+                UserEmail = reservation.User?.Email ?? "Unknown",
+                Date = reservation.ReservationDate.ToShortDateString(),
+                StartTime = reservation.StartTime.ToString(@"hh\:mm"),
+                EndTime = reservation.EndTime.ToString(@"hh\:mm"),
+                Purpose = reservation.Purpose,
+                ExpectedAttendees = reservation.ExpectedAttendees,
+                Notes = reservation.Notes,
+                Decision = "Approve"
+            };
+            
+            return View(viewModel);
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ApproveReservations)]
+        public async Task<IActionResult> ReviewReservation(ReviewReservationViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            
+            try
+            {
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                
+                if (model.Decision == "Approve")
+                {
+                    await _facilityReservationService.ApproveReservationAsync(model.Id, userId, model.Remarks);
+                    TempData["SuccessMessage"] = "Reservation approved successfully.";
+                }
+                else
+                {
+                    await _facilityReservationService.RejectReservationAsync(model.Id, userId, model.Remarks);
+                    TempData["SuccessMessage"] = "Reservation rejected successfully.";
+                }
+                
+                return RedirectToAction(nameof(FacilityReservations));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ApproveReservations)]
+        public async Task<IActionResult> CancelReservation(int id, string remarks)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value ?? "0");
+                await _facilityReservationService.AdminCancelReservationAsync(id, userId, remarks);
+                TempData["SuccessMessage"] = "Reservation cancelled successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            
             return RedirectToAction(nameof(FacilityReservations));
+        }
+        
+        private AdminReservationViewModel MapReservationToAdminViewModel(FacilityReservation reservation)
+        {
+            var now = DateTime.Now;
+            var reservationDateTime = reservation.ReservationDate.Add(reservation.StartTime);
+            var isPast = reservationDateTime < now;
+            
+            // Ensure User is loaded
+            if (reservation.User == null)
+            {
+                // Try to load the user if not already loaded
+                reservation.User = _userService.GetUserByIdAsync(reservation.UserId).GetAwaiter().GetResult();
+            }
+            
+            string userName = "Unknown";
+            string userEmail = "Unknown";
+            
+            if (reservation.User != null)
+            {
+                userName = string.IsNullOrWhiteSpace(reservation.User.FirstName) && string.IsNullOrWhiteSpace(reservation.User.LastName)
+                    ? "User #" + reservation.UserId
+                    : $"{reservation.User.FirstName} {reservation.User.LastName}".Trim();
+                
+                userEmail = string.IsNullOrWhiteSpace(reservation.User.Email)
+                    ? "No email provided"
+                    : reservation.User.Email;
+            }
+            
+            return new AdminReservationViewModel
+            {
+                Id = reservation.Id,
+                FacilityId = reservation.FacilityId,
+                FacilityName = reservation.Facility?.Name ?? "Unknown",
+                UserName = userName,
+                UserEmail = userEmail,
+                Date = reservation.ReservationDate.ToShortDateString(),
+                StartTime = reservation.StartTime.ToString(@"hh\:mm"),
+                EndTime = reservation.EndTime.ToString(@"hh\:mm"),
+                Duration = (reservation.EndTime - reservation.StartTime).ToString(@"h\:mm"),
+                Purpose = reservation.Purpose,
+                ExpectedAttendees = reservation.ExpectedAttendees,
+                Notes = reservation.Notes,
+                Status = reservation.Status,
+                AdminRemarks = reservation.AdminRemarks ?? "",
+                ReviewedByUser = reservation.ReviewedByUser != null 
+                    ? $"{reservation.ReviewedByUser.FirstName} {reservation.ReviewedByUser.LastName}" 
+                    : "",
+                CreatedAt = reservation.CreatedAt.ToString("g"),
+                IsPast = isPast,
+                CanReview = reservation.Status == ReservationStatus.Pending && !isPast,
+                CanCancel = reservation.Status != ReservationStatus.Cancelled && !isPast
+            };
+        }
+        
+        private AdminReservationDetailsViewModel MapReservationToAdminDetailsViewModel(FacilityReservation reservation)
+        {
+            var viewModel = MapReservationToAdminViewModel(reservation);
+            
+            return new AdminReservationDetailsViewModel
+            {
+                Id = viewModel.Id,
+                FacilityId = viewModel.FacilityId,
+                FacilityName = viewModel.FacilityName,
+                UserName = viewModel.UserName,
+                UserEmail = viewModel.UserEmail,
+                Date = viewModel.Date,
+                StartTime = viewModel.StartTime,
+                EndTime = viewModel.EndTime,
+                Duration = viewModel.Duration,
+                Purpose = viewModel.Purpose,
+                ExpectedAttendees = viewModel.ExpectedAttendees,
+                Notes = viewModel.Notes,
+                Status = viewModel.Status,
+                AdminRemarks = viewModel.AdminRemarks,
+                ReviewedByUser = viewModel.ReviewedByUser,
+                CreatedAt = viewModel.CreatedAt,
+                UpdatedAt = reservation.UpdatedAt?.ToString("g") ?? "",
+                ApprovedAt = reservation.ApprovedAt?.ToString("g") ?? "",
+                RejectedAt = reservation.RejectedAt?.ToString("g") ?? "",
+                IsPast = viewModel.IsPast,
+                CanReview = viewModel.CanReview,
+                CanCancel = viewModel.CanCancel
+            };
         }
         
         #endregion

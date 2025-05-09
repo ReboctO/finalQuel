@@ -344,6 +344,36 @@ namespace TheQuel.Services
             return reservation;
         }
         
+        public async Task<FacilityReservation> AdminCancelReservationAsync(int id, int adminUserId, string remarks)
+        {
+            // Get reservation
+            var reservation = await _reservationRepository.GetByIdAsync(id);
+            if (reservation == null)
+            {
+                throw new InvalidOperationException($"Reservation with ID {id} not found.");
+            }
+            
+            // Check if the reservation can be cancelled (not already cancelled or rejected)
+            if (reservation.Status == ReservationStatus.Cancelled || reservation.Status == ReservationStatus.Rejected)
+            {
+                throw new InvalidOperationException($"Cannot cancel a reservation with status '{reservation.Status}'.");
+            }
+            
+            // Update the reservation
+            reservation.Status = ReservationStatus.Cancelled;
+            reservation.AdminRemarks = remarks;
+            reservation.ReviewedByUserId = adminUserId;
+            reservation.UpdatedAt = DateTime.Now;
+            
+            await _reservationRepository.UpdateAsync(reservation);
+            await _unitOfWork.SaveChangesAsync();
+            
+            // Send notification
+            await SendReservationNotificationAsync(reservation.Id, "admin_cancelled");
+            
+            return reservation;
+        }
+        
         public async Task<bool> DeleteReservationAsync(int id)
         {
             var reservation = await _reservationRepository.GetByIdAsync(id);

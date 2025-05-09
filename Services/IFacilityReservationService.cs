@@ -39,6 +39,7 @@ namespace TheQuel.Services
         Task<FacilityReservation> ApproveReservationAsync(int id, int adminUserId, string? remarks = null);
         Task<FacilityReservation> RejectReservationAsync(int id, int adminUserId, string remarks);
         Task<FacilityReservation> CancelReservationAsync(int id);
+        Task<FacilityReservation> AdminCancelReservationAsync(int id, int adminUserId, string remarks);
         Task<bool> DeleteReservationAsync(int id);
         
         Task<bool> IsTimeSlotAvailableAsync(int facilityId, DateTime date, TimeSpan startTime, TimeSpan endTime, int? excludeReservationId = null);

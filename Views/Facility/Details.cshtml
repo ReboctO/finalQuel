@@ -1,0 +1,155 @@
+@model FacilityViewModel
+@{
+    ViewData["Title"] = Model.Name;
+    var today = DateTime.Today;
+    var maxDate = today.AddDays(Model.MaxDaysInAdvance);
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Facilities</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">@Model.Name</h1>
+            <p class="mb-0">
+                <span class="badge bg-info">@Model.TypeName</span>
+                @if (Model.IsActive)
+                {
+                    <span class="badge bg-success">Available</span>
+                }
+                else
+                {
+                    <span class="badge bg-danger">Unavailable</span>
+                }
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="Reserve" asp-route-id="@Model.Id" asp-route-date="@(ViewContext.HttpContext.Request.Query["date"].ToString() ?? DateTime.Today.ToString("yyyy-MM-dd"))" class="btn btn-primary">
+                <i class="bi bi-calendar-plus"></i> Reserve Now
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl" class="img-fluid rounded mb-4" alt="@Model.Name" style="max-height: 400px; width: 100%; object-fit: cover;">
+                    }
+                    <h5 class="card-title">About this Facility</h5>
+                    <p class="card-text">@Model.Description</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5>Details</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-people"></i> Capacity</span>
+                                    <span>@Model.Capacity people</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-geo-alt"></i> Location</span>
+                                    <span>@Model.Location</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-clock"></i> Hours</span>
+                                    <span>@Model.OpeningTime - @Model.ClosingTime</span>
+                                </li>
+                                @if (Model.HourlyRate.HasValue && Model.HourlyRate.Value > 0)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-currency-dollar"></i> Rate</span>
+                                        <span>@Model.HourlyRate.Value.ToString("C")/hour</span>
+                                    </li>
+                                }
+                                else
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span><i class="bi bi-currency-dollar"></i> Rate</span>
+                                        <span class="text-success">Free</span>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Reservation Rules</h5>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-calendar-check"></i> Advance Booking</span>
+                                    <span>Up to @Model.MaxDaysInAdvance days</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-calendar-week"></i> Max Reservations</span>
+                                    <span>@Model.MaxReservationsPerUser per week</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-shield-check"></i> Approval Required</span>
+                                    <span>@(Model.RequiresAdminApproval ? "Yes" : "No")</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Availability</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Details" method="get" class="mb-3">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <div class="form-group">
+                            <label class="form-label">Select Date</label>
+                            <input type="date" name="date" class="form-control" 
+                                   value="@(ViewContext.HttpContext.Request.Query["date"].ToString() ?? DateTime.Today.ToString("yyyy-MM-dd"))"
+                                   min="@today.ToString("yyyy-MM-dd")" 
+                                   max="@maxDate.ToString("yyyy-MM-dd")" />
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-2 w-100">Check Availability</button>
+                    </form>
+                    
+                    <h6>Available Time Slots</h6>
+                    @if (Model.AvailableTimeSlots != null && Model.AvailableTimeSlots.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var slot in Model.AvailableTimeSlots)
+                            {
+                                <div class="list-group-item @(!slot.IsAvailable ? "list-group-item-danger" : "")">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>@slot.StartTime - @slot.EndTime</span>
+                                        @if (slot.IsAvailable)
+                                        {
+                                            <span class="badge bg-success">Available</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Booked</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info">
+                            No time slots available for the selected date. Please try another date.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 

@@ -1,0 +1,255 @@
+@model AdminReservationListViewModel
+@{
+    ViewData["Title"] = "Facility Reservations";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h3 mb-0 text-gray-800">Facility Reservations</h1>
+            <p class="mb-0">Manage and review reservation requests.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a asp-action="FacilityManagement" class="btn btn-outline-secondary">
+                <i class="bi bi-building"></i> Manage Facilities
+            </a>
+            <a asp-action="ReservationCalendar" class="btn btn-outline-primary">
+                <i class="bi bi-calendar3"></i> Calendar View
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">Filter Reservations</h6>
+        </div>
+        <div class="card-body">
+            <form asp-action="FacilityReservations" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="searchTerm" class="form-control" placeholder="Search by name, email, purpose..." value="@Model.SearchTerm">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="0">Pending</option>
+                        <option value="1">Approved</option>
+                        <option value="2">Rejected</option>
+                        <option value="3">Cancelled</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Facility</label>
+                    <select name="facilityId" class="form-select" asp-items="Model.Facilities">
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="startDate" class="form-control" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="endDate" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))">
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Pending Reservations -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-warning">
+            <h6 class="m-0 font-weight-bold text-white">Pending Reservations</h6>
+        </div>
+        <div class="card-body">
+            @{
+                var pendingReservations = Model.Reservations.Where(r => r.Status == TheQuel.Core.ReservationStatus.Pending).ToList();
+            }
+            
+            @if (pendingReservations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover" id="pendingTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Facility</th>
+                                <th>Homeowner</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Purpose</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reservation in pendingReservations)
+                            {
+                                <tr>
+                                    <td>@reservation.Id</td>
+                                    <td>@reservation.FacilityName</td>
+                                    <td>
+                                        @reservation.UserName
+                                        <div class="small text-muted">@reservation.UserEmail</div>
+                                    </td>
+                                    <td>@reservation.Date</td>
+                                    <td>@reservation.StartTime - @reservation.EndTime</td>
+                                    <td>@reservation.Purpose</td>
+                                    <td>@reservation.CreatedAt</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a asp-action="ReservationDetails" asp-route-id="@reservation.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-info-circle"></i> Details
+                                            </a>
+                                            @if (reservation.CanReview)
+                                            {
+                                                <a asp-action="ReviewReservation" asp-route-id="@reservation.Id" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-check-circle"></i> Review
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No pending reservations found.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- All Reservations -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-primary">
+            <h6 class="m-0 font-weight-bold text-white">All Reservations</h6>
+        </div>
+        <div class="card-body">
+            @if (Model.Reservations.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover" id="reservationsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Facility</th>
+                                <th>Homeowner</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Purpose</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var reservation in Model.Reservations)
+                            {
+                                <tr>
+                                    <td>@reservation.Id</td>
+                                    <td>@reservation.FacilityName</td>
+                                    <td>
+                                        @reservation.UserName
+                                        <div class="small text-muted">@reservation.UserEmail</div>
+                                    </td>
+                                    <td>@reservation.Date</td>
+                                    <td>@reservation.StartTime - @reservation.EndTime</td>
+                                    <td>@reservation.Purpose</td>
+                                    <td>
+                                        @switch (reservation.Status)
+                                        {
+                                            case TheQuel.Core.ReservationStatus.Pending:
+                                                <span class="badge bg-warning">Pending</span>
+                                                break;
+                                            case TheQuel.Core.ReservationStatus.Approved:
+                                                <span class="badge bg-success">Approved</span>
+                                                break;
+                                            case TheQuel.Core.ReservationStatus.Rejected:
+                                                <span class="badge bg-danger">Rejected</span>
+                                                break;
+                                            case TheQuel.Core.ReservationStatus.Cancelled:
+                                                <span class="badge bg-secondary">Cancelled</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a asp-action="ReservationDetails" asp-route-id="@reservation.Id" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-info-circle"></i> Details
+                                            </a>
+                                            @if (reservation.CanReview)
+                                            {
+                                                <a asp-action="ReviewReservation" asp-route-id="@reservation.Id" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-check-circle"></i> Review
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No reservations found matching your criteria.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" />
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Set the selected status in the dropdown
+            @if (Model.FilterStatus.HasValue)
+            {
+                <text>
+                $('select[name="status"]').val('@((int)Model.FilterStatus.Value)');
+                </text>
+            }
+            
+            // Set the selected facility in the dropdown
+            @if (Model.FacilityId.HasValue)
+            {
+                <text>
+                $('select[name="facilityId"]').val('@Model.FacilityId.Value');
+                </text>
+            }
+            
+            // Initialize DataTables
+            $('#pendingTable').DataTable({
+                order: [[6, 'asc']], // Sort by created date ascending
+                pageLength: 10,
+                language: {
+                    search: "Search pending reservations:"
+                }
+            });
+            
+            $('#reservationsTable').DataTable({
+                order: [[3, 'desc'], [4, 'desc']], // Sort by date and time
+                pageLength: 25,
+                language: {
+                    search: "Search all reservations:"
+                }
+            });
+        });
+    </script>
+} 

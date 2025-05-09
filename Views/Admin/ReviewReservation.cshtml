@@ -1,0 +1,190 @@
+@model ReviewReservationViewModel
+@{
+    ViewData["Title"] = "Review Reservation";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="FacilityReservations">Facility Reservations</a></li>
+                    <li class="breadcrumb-item"><a asp-action="ReservationDetails" asp-route-id="@Model.Id">Reservation #@Model.Id</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Review</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">Review Reservation Request</h1>
+            <p class="mb-0">
+                <span class="badge bg-info">@Model.FacilityName</span>
+                <span class="badge bg-warning">Pending</span>
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="ReservationDetails" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Details
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">Review Decision</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="ReviewReservation" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Decision" class="form-label">Your Decision</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="Decision" id="approve" value="Approve" checked>
+                                        <label class="btn btn-outline-success" for="approve">
+                                            <i class="bi bi-check-circle"></i> Approve Reservation
+                                        </label>
+                                        
+                                        <input type="radio" class="btn-check" name="Decision" id="reject" value="Reject">
+                                        <label class="btn btn-outline-danger" for="reject">
+                                            <i class="bi bi-x-circle"></i> Reject Reservation
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Remarks" class="form-label">Admin Remarks</label>
+                                    <textarea asp-for="Remarks" class="form-control" rows="4" placeholder="Optional remarks to the homeowner..."></textarea>
+                                    <span asp-validation-for="Remarks" class="text-danger"></span>
+                                    <div class="form-text">These remarks will be visible to the homeowner.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> The homeowner will be notified of your decision via email and in-app notification.
+                        </div>
+                        
+                        <div class="text-end">
+                            <a asp-action="ReservationDetails" asp-route-id="@Model.Id" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary" id="submitButton">Submit Decision</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">Reservation Details</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Facility</h6>
+                        <p>@Model.FacilityName</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Homeowner</h6>
+                        <p>@Model.UserName</p>
+                        <p><a href="mailto:@Model.UserEmail">@Model.UserEmail</a></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Date & Time</h6>
+                        <p>@Model.Date, @Model.StartTime - @Model.EndTime</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>Purpose</h6>
+                        <p>@Model.Purpose</p>
+                    </div>
+                    
+                    @if (Model.ExpectedAttendees.HasValue)
+                    {
+                        <div class="mb-3">
+                            <h6>Expected Attendees</h6>
+                            <p>@Model.ExpectedAttendees</p>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="mb-3">
+                            <h6>Additional Notes</h6>
+                            <p>@Model.Notes</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">Conflicts Check</h6>
+                </div>
+                <div class="card-body">
+                    <div id="conflictsLoading" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Checking for conflicts...</p>
+                    </div>
+                    
+                    <div id="conflictsResult" class="d-none">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Check for conflicts
+            setTimeout(function() {
+                $('#conflictsLoading').addClass('d-none');
+                $('#conflictsResult').removeClass('d-none');
+                $('#conflictsResult').html('<div class="alert alert-success"><i class="bi bi-check-circle"></i> No scheduling conflicts found for this time slot.</div>');
+            }, 1500);
+            
+            // Set initial button state
+            updateButtonStyle();
+            
+            // Change form appearance based on decision
+            $('input[name="Decision"]').change(function() {
+                updateButtonStyle();
+            });
+            
+            function updateButtonStyle() {
+                if ($('input[name="Decision"]:checked').val() === 'Approve') {
+                    $('#submitButton').removeClass('btn-danger').addClass('btn-success').html('<i class="bi bi-check-circle"></i> Approve Reservation');
+                    $('#Remarks').attr('placeholder', 'Optional remarks to the homeowner...');
+                } else {
+                    $('#submitButton').removeClass('btn-success').addClass('btn-danger').html('<i class="bi bi-x-circle"></i> Reject Reservation');
+                    $('#Remarks').attr('placeholder', 'Please provide a reason for rejection...');
+                }
+            }
+            
+            // Form validation
+            $('form').submit(function(e) {
+                if ($('input[name="Decision"]:checked').val() === 'Reject' && $('#Remarks').val().trim() === '') {
+                    e.preventDefault();
+                    alert('Please provide a reason for rejection.');
+                    $('#Remarks').focus();
+                }
+            });
+        });
+    </script>
+} 

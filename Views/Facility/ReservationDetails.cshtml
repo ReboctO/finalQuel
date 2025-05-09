@@ -1,0 +1,244 @@
+@model ReservationDetailsViewModel
+@{
+    ViewData["Title"] = "Reservation Details";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="Index">Facilities</a></li>
+                    <li class="breadcrumb-item"><a asp-action="MyReservations">My Reservations</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Details</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">Reservation Details</h1>
+            <p class="mb-0">
+                <span class="badge bg-info">@Model.FacilityName</span>
+                @switch (Model.Status)
+                {
+                    case TheQuel.Core.ReservationStatus.Pending:
+                        <span class="badge bg-warning">Pending</span>
+                        break;
+                    case TheQuel.Core.ReservationStatus.Approved:
+                        <span class="badge bg-success">Approved</span>
+                        break;
+                    case TheQuel.Core.ReservationStatus.Rejected:
+                        <span class="badge bg-danger">Rejected</span>
+                        break;
+                    case TheQuel.Core.ReservationStatus.Cancelled:
+                        <span class="badge bg-secondary">Cancelled</span>
+                        break;
+                }
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="MyReservations" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to My Reservations
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Reservation Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Facility</h6>
+                            <p>@Model.FacilityName</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Date</h6>
+                            <p>@Model.Date</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Time</h6>
+                            <p>@Model.StartTime - @Model.EndTime (@Model.Duration)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Purpose</h6>
+                            <p>@Model.Purpose</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Expected Attendees</h6>
+                            <p>@(Model.ExpectedAttendees.HasValue ? Model.ExpectedAttendees.Value.ToString() : "Not specified")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Status</h6>
+                            <p>
+                                @switch (Model.Status)
+                                {
+                                    case TheQuel.Core.ReservationStatus.Pending:
+                                        <span class="badge bg-warning">Pending</span>
+                                        break;
+                                    case TheQuel.Core.ReservationStatus.Approved:
+                                        <span class="badge bg-success">Approved</span>
+                                        break;
+                                    case TheQuel.Core.ReservationStatus.Rejected:
+                                        <span class="badge bg-danger">Rejected</span>
+                                        break;
+                                    case TheQuel.Core.ReservationStatus.Cancelled:
+                                        <span class="badge bg-secondary">Cancelled</span>
+                                        break;
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6>Additional Notes</h6>
+                                <p>@Model.Notes</p>
+                            </div>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.AdminRemarks))
+                    {
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    <h6>Admin Remarks</h6>
+                                    <p>@Model.AdminRemarks</p>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="row">
+                        <div class="col-md-12 text-end">
+                            @if (Model.CanCancel)
+                            {
+                                <a asp-action="CancelReservation" asp-route-id="@Model.Id" class="btn btn-danger">
+                                    <i class="bi bi-x-circle"></i> Cancel Reservation
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Timeline</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="timeline">
+                        <li class="timeline-item">
+                            <div class="timeline-marker"></div>
+                            <div class="timeline-content">
+                                <h6 class="timeline-title">Reservation Created</h6>
+                                <p class="timeline-date">@Model.CreatedAt</p>
+                            </div>
+                        </li>
+                        
+                        @if (!string.IsNullOrEmpty(Model.UpdatedAt))
+                        {
+                            <li class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Last Updated</h6>
+                                    <p class="timeline-date">@Model.UpdatedAt</p>
+                                </div>
+                            </li>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(Model.ApprovedAt))
+                        {
+                            <li class="timeline-item">
+                                <div class="timeline-marker bg-success"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Approved</h6>
+                                    <p class="timeline-date">@Model.ApprovedAt</p>
+                                    @if (!string.IsNullOrEmpty(Model.ReviewedByUser))
+                                    {
+                                        <p>by @Model.ReviewedByUser</p>
+                                    }
+                                </div>
+                            </li>
+                        }
+                        
+                        @if (!string.IsNullOrEmpty(Model.RejectedAt))
+                        {
+                            <li class="timeline-item">
+                                <div class="timeline-marker bg-danger"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">Rejected</h6>
+                                    <p class="timeline-date">@Model.RejectedAt</p>
+                                    @if (!string.IsNullOrEmpty(Model.ReviewedByUser))
+                                    {
+                                        <p>by @Model.ReviewedByUser</p>
+                                    }
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Timeline styling */
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+        list-style: none;
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 20px;
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: -30px;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background-color: #4e73df;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #4e73df;
+    }
+    
+    .timeline-content {
+        padding-bottom: 10px;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    
+    .timeline-title {
+        margin-bottom: 5px;
+    }
+    
+    .timeline-date {
+        color: #858796;
+        font-size: 0.85rem;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 0;
+        height: 100%;
+        width: 2px;
+        background-color: #e3e6f0;
+    }
+</style> 

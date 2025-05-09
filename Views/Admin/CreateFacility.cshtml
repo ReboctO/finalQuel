@@ -1,0 +1,174 @@
+@model FacilityCreateViewModel
+@{
+    ViewData["Title"] = "Create Facility";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a asp-action="FacilityManagement">Facilities</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create New Facility</li>
+                </ol>
+            </nav>
+            <h1 class="h3 mb-0 text-gray-800">Create New Facility</h1>
+            <p class="mb-0">Add a new facility or amenity to the community.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a asp-action="FacilityManagement" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Facilities
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-primary">
+                    <h6 class="m-0 font-weight-bold text-white">Facility Information</h6>
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateFacility" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Name" class="form-label"></label>
+                                    <input asp-for="Name" class="form-control" />
+                                    <span asp-validation-for="Name" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Type" class="form-label"></label>
+                                    <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<TheQuel.Core.FacilityType>()">
+                                        <option value="">Select Type</option>
+                                    </select>
+                                    <span asp-validation-for="Type" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label asp-for="Description" class="form-label"></label>
+                                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                    <span asp-validation-for="Description" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Location" class="form-label"></label>
+                                    <input asp-for="Location" class="form-control" />
+                                    <span asp-validation-for="Location" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="Capacity" class="form-label"></label>
+                                    <input asp-for="Capacity" class="form-control" type="number" min="1" />
+                                    <span asp-validation-for="Capacity" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="OpeningTime" class="form-label"></label>
+                                    <input asp-for="OpeningTime" class="form-control" type="time" />
+                                    <span asp-validation-for="OpeningTime" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ClosingTime" class="form-label"></label>
+                                    <input asp-for="ClosingTime" class="form-control" type="time" />
+                                    <span asp-validation-for="ClosingTime" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="HourlyRate" class="form-label"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input asp-for="HourlyRate" class="form-control" type="number" step="0.01" min="0" />
+                                    </div>
+                                    <span asp-validation-for="HourlyRate" class="text-danger"></span>
+                                    <div class="form-text">Leave empty if the facility is free to use.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ImageUrl" class="form-label"></label>
+                                    <input asp-for="ImageUrl" class="form-control" />
+                                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                                    <div class="form-text">Enter a URL to an image of the facility.</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="MaxDaysInAdvance" class="form-label"></label>
+                                    <input asp-for="MaxDaysInAdvance" class="form-control" type="number" min="1" max="365" />
+                                    <span asp-validation-for="MaxDaysInAdvance" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label asp-for="MaxReservationsPerUser" class="form-label"></label>
+                                    <input asp-for="MaxReservationsPerUser" class="form-control" type="number" min="1" max="10" />
+                                    <span asp-validation-for="MaxReservationsPerUser" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mt-4">
+                                    <div class="form-check">
+                                        <input asp-for="RequiresAdminApproval" class="form-check-input" />
+                                        <label asp-for="RequiresAdminApproval" class="form-check-label"></label>
+                                    </div>
+                                    <span asp-validation-for="RequiresAdminApproval" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-end">
+                            <a asp-action="FacilityManagement" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Create Facility</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        $(document).ready(function() {
+            // Validate that closing time is after opening time
+            $('form').submit(function(e) {
+                var openingTime = $('#OpeningTime').val();
+                var closingTime = $('#ClosingTime').val();
+                
+                if (openingTime >= closingTime) {
+                    e.preventDefault();
+                    alert('Closing time must be after opening time.');
+                }
+            });
+        });
+    </script>
+} 
