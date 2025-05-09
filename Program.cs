@@ -31,12 +31,21 @@ namespace TheQuel
             builder.Services.AddScoped<TheQuel.Core.IUserRepository, TheQuel.Data.UserRepository>();
             builder.Services.AddScoped<TheQuel.Core.IPropertyRepository, TheQuel.Data.PropertyRepository>();
             builder.Services.AddScoped<TheQuel.Core.IAnnouncementRepository, TheQuel.Data.AnnouncementRepository>();
+            builder.Services.AddScoped<TheQuel.Core.IPaymentRepository, TheQuel.Data.PaymentRepository>();
+            builder.Services.AddScoped<TheQuel.Core.IFacilityRepository, TheQuel.Data.FacilityRepository>();
+            builder.Services.AddScoped<TheQuel.Core.IFacilityReservationRepository, TheQuel.Data.FacilityReservationRepository>();
+
+            // Register unit of work
+            builder.Services.AddScoped<TheQuel.Core.IUnitOfWork, TheQuel.Data.UnitOfWork>();
 
             // Register services
             builder.Services.AddScoped<TheQuel.Services.IAuthService, TheQuel.Services.AuthService>();
             builder.Services.AddScoped<TheQuel.Services.IUserService, TheQuel.Services.UserService>();
             builder.Services.AddScoped<TheQuel.Services.IPropertyService, TheQuel.Services.PropertyService>();
             builder.Services.AddScoped<TheQuel.Services.IAnnouncementService, TheQuel.Services.AnnouncementService>();
+            builder.Services.AddScoped<TheQuel.Services.IPaymentService, TheQuel.Services.PaymentService>();
+            builder.Services.AddScoped<TheQuel.Services.IFacilityService, TheQuel.Services.FacilityService>();
+            builder.Services.AddScoped<TheQuel.Services.IFacilityReservationService, TheQuel.Services.FacilityReservationService>();
 
             // Add authentication and authorization
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -84,18 +93,29 @@ namespace TheQuel
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
+                    
+                    Console.WriteLine("----------------------------");
+                    Console.WriteLine("Ensuring database is created and up to date...");
+                    
+                    // Make sure database is created
                     context.Database.EnsureCreated();
                     
+                   
                     // Ensure Announcements tables exist
                     await DatabaseMigrator.MigrateAnnouncementTablesAsync(app.Services);
                     
                     // Seed admin user
+                    Console.WriteLine("Seeding admin user...");
                     await AdminSeeder.SeedAdminUser(app.Services);
+                    Console.WriteLine("Database initialization complete.");
+                    Console.WriteLine("----------------------------");
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
                     logger.LogError(ex, "An error occurred while seeding the database.");
+                    Console.WriteLine($"Database initialization error: {ex.Message}");
+                    Console.WriteLine(ex.ToString());
                 }
             }
 

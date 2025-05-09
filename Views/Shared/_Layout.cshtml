@@ -54,6 +54,8 @@
                                         <li><a class="dropdown-item" asp-controller="Payments" asp-action="Index">Payments</a></li>
                                         <li><a class="dropdown-item" asp-controller="Complaints" asp-action="Index">Complaints</a></li>
                                         <li><a class="dropdown-item" asp-controller="Events" asp-action="Index">Events</a></li>
+                                        <li><a class="dropdown-item" asp-controller="AdminFacility" asp-action="Index">Facilities</a></li>
+                                        <li><a class="dropdown-item" asp-controller="AdminFacility" asp-action="PendingReservations">Facility Reservations</a></li>
                                     </ul>
                                 </li>
                             }
@@ -68,6 +70,15 @@
                                     <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "MyComplaints" ? "active" : "")" asp-controller="Complaints" asp-action="MyComplaints">
                                         <i class="bi bi-exclamation-circle me-1"></i>My Complaints
                                     </a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Facility" ? "active" : "")" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-building me-1"></i>Facilities
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="Facility" asp-action="Index">Browse Facilities</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Facility" asp-action="MyReservations">My Reservations</a></li>
+                                    </ul>
                                 </li>
                             }
                             <li class="nav-item">

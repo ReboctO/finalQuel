@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq;
 using System.Threading.Tasks;
 using TheQuel.Core;
@@ -17,12 +18,18 @@ namespace TheQuel.Controllers
         private readonly IUserService _userService;
         private readonly IPropertyService _propertyService;
         private readonly IAnnouncementService _announcementService;
+        private readonly IPaymentService _paymentService;
         
-        public AdminController(IUserService userService, IPropertyService propertyService, IAnnouncementService announcementService)
+        public AdminController(
+            IUserService userService, 
+            IPropertyService propertyService, 
+            IAnnouncementService announcementService,
+            IPaymentService paymentService)
         {
             _userService = userService;
             _propertyService = propertyService;
             _announcementService = announcementService;
+            _paymentService = paymentService;
         }
         
         public async Task<IActionResult> Dashboard()
@@ -513,34 +520,203 @@ namespace TheQuel.Controllers
         
         #region Billing
         
-        public IActionResult BillingDashboard()
+        [RequirePermission(Permission.ManageBilling)]
+        public async Task<IActionResult> BillingDashboard()
         {
-            return View();
+            var currentYear = DateTime.Now.Year;
+            var currentMonth = DateTime.Now.Month;
+            
+            var model = new BillingDashboardViewModel
+            {
+                TotalYearlyPayments = await _paymentService.GetTotalPaymentsForYearAsync(currentYear),
+                TotalMonthlyPayments = await _paymentService.GetTotalPaymentsForMonthAsync(currentYear, currentMonth),
+                PendingPaymentsCount = await _paymentService.GetPendingPaymentsCountAsync(),
+                OverduePaymentsCount = await _paymentService.GetOverduePaymentsCountAsync(),
+                
+                // Get recent payments
+                RecentPayments = (await _paymentService.GetAllPaymentsAsync())
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Take(10)
+                    .ToList(),
+                
+                // Get pending bills
+                PendingBills = (await _paymentService.GetPaymentsByStatusAsync(PaymentStatus.Pending))
+                    .OrderBy(p => p.DueDate)
+                    .Take(10)
+                    .ToList()
+            };
+            
+            return View(model);
         }
         
+        [RequirePermission(Permission.GenerateBills)]
         public IActionResult GenerateBills()
         {
-            return View();
+            var model = new BillGenerationViewModel
+            {
+                DueDate = DateTime.Now.AddDays(30),
+                GenerateForAllHomeowners = true
+            };
+            
+            return View(model);
         }
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult GenerateBills(BillGenerationViewModel model)
+        [RequirePermission(Permission.GenerateBills)]
+        public async Task<IActionResult> GenerateBills(BillGenerationViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
             
-            // TODO: Implement bill generation logic
-            
-            TempData["SuccessMessage"] = "Bills generated successfully.";
-            return RedirectToAction(nameof(BillingDashboard));
+            try
+            {
+                var generatedBills = await _paymentService.GenerateBillsAsync(
+                    model.BillType,
+                    model.Amount,
+                    model.DueDate,
+                    model.Notes,
+                    model.GenerateForAllHomeowners);
+                
+                TempData["SuccessMessage"] = $"Successfully generated {generatedBills.Count()} bills for homeowners.";
+                return RedirectToAction(nameof(BillingDashboard));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
         }
-        
+        [RequirePermission(Permission.ViewPaymentReports)]
         public IActionResult PaymentReports()
         {
-            return View();
+            var model = new PaymentReportsViewModel
+            {
+                CurrentYear = DateTime.Now.Year,
+                CurrentMonth = DateTime.Now.Month,
+                ReportTypes = new List<SelectListItem>
+                {
+                    new SelectListItem { Value = "monthly", Text = "Monthly Payments" },
+                    new SelectListItem { Value = "yearly", Text = "Yearly Payments" },
+                    new SelectListItem { Value = "status", Text = "Payments by Status" },
+                    new SelectListItem { Value = "type", Text = "Payments by Type" }
+                },
+                PaymentStatuses = Enum.GetValues(typeof(PaymentStatus))
+                    .Cast<PaymentStatus>()
+                    .Select(s => new SelectListItem
+                    {
+                        Value = ((int)s).ToString(),
+                        Text = s.ToString()
+                    })
+                    .ToList(),
+                PaymentTypes = Enum.GetValues(typeof(PaymentType))
+                    .Cast<PaymentType>()
+                    .Select(t => new SelectListItem
+                    {
+                        Value = ((int)t).ToString(),
+                        Text = t.ToString()
+                    })
+                    .ToList(),
+                Years = Enumerable.Range(DateTime.Now.Year - 5, 6)
+                    .Select(y => new SelectListItem
+                    {
+                        Value = y.ToString(),
+                        Text = y.ToString()
+                    })
+                    .ToList(),
+                Months = Enumerable.Range(1, 12)
+                    .Select(m => new SelectListItem
+                    {
+                        Value = m.ToString(),
+                        Text = new DateTime(2000, m, 1).ToString("MMMM")
+                    })
+                    .ToList()
+            };
+            
+            return View(model);
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ViewPaymentReports)]
+        public async Task<IActionResult> GeneratePaymentReport(PaymentReportsViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("PaymentReports", model);
+            }
+            
+            IEnumerable<Payment> reportData = new List<Payment>();
+            string reportTitle = "";
+            
+            try
+            {
+                switch (model.ReportType)
+                {
+                    case "monthly":
+                        var startDate = new DateTime(model.Year, model.Month, 1);
+                        var endDate = startDate.AddMonths(1).AddDays(-1);
+                        reportData = await _paymentService.GetPaymentsByDateRangeAsync(startDate, endDate);
+                        reportTitle = $"Monthly Payments Report - {startDate:MMMM yyyy}";
+                        break;
+                        
+                    case "yearly":
+                        var yearStart = new DateTime(model.Year, 1, 1);
+                        var yearEnd = new DateTime(model.Year, 12, 31);
+                        reportData = await _paymentService.GetPaymentsByDateRangeAsync(yearStart, yearEnd);
+                        reportTitle = $"Yearly Payments Report - {model.Year}";
+                        break;
+                        
+                    case "status":
+                        reportData = await _paymentService.GetPaymentsByStatusAsync((PaymentStatus)model.StatusId);
+                        reportTitle = $"Payments by Status - {(PaymentStatus)model.StatusId}";
+                        break;
+                        
+                    case "type":
+                        reportData = await _paymentService.GetAllPaymentsAsync();
+                        reportData = reportData.Where(p => p.Type == (PaymentType)model.TypeId);
+                        reportTitle = $"Payments by Type - {(PaymentType)model.TypeId}";
+                        break;
+                        
+                    default:
+                        ModelState.AddModelError("ReportType", "Invalid report type selected");
+                        return View("PaymentReports", model);
+                }
+                
+                model.ReportTitle = reportTitle;
+                model.ReportData = reportData.ToList();
+                model.TotalAmount = reportData.Sum(p => p.Amount);
+                model.PaidAmount = reportData.Where(p => p.Status == PaymentStatus.Paid).Sum(p => p.Amount);
+                model.PendingAmount = reportData.Where(p => p.Status == PaymentStatus.Pending).Sum(p => p.Amount);
+                model.OverdueAmount = reportData.Where(p => p.Status == PaymentStatus.Overdue).Sum(p => p.Amount);
+                
+                return View("PaymentReportResults", model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View("PaymentReports", model);
+            }
+        }
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [RequirePermission(Permission.ProcessPayments)]
+        public async Task<IActionResult> ProcessPayment(int paymentId, string referenceNumber)
+        {
+            try
+            {
+                await _paymentService.RecordPaymentAsync(paymentId, DateTime.Now, referenceNumber);
+                TempData["SuccessMessage"] = "Payment processed successfully.";
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
+            
+            return RedirectToAction(nameof(BillingDashboard));
         }
         
         #endregion
